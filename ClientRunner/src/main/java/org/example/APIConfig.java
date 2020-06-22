@@ -4,52 +4,85 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 
-import netscape.javascript.JSObject;
+import org.example.enums.ConfigEnum;
+import org.example.enums.RunTypes;
 import org.json.JSONObject;
 
 public class APIConfig {
+
     private String returnMail;
     private String runPos;
-    private String runtype;
+    private RunTypes runtype;
+
+
+
+    private String srcRoot;
 
     private final String defaultReturnMail = "<mail_addr>";
     private final String defaultRunPos = "./target/*-bin.jar";  // usually shadow jars
-    private final String defaultRuntype = "JAVA";
+    private final RunTypes defaultRuntype = RunTypes.JAVA;
+    private final String defultSrcRoot = "./src/main/java";
 
 
     private File configFile;
-    private final String configFP = "./api-config.json";
+    public final String configFP = new File("./.apiconfig").getAbsolutePath();
 
-    private HashMap<String, String> configValues;
-
-    public HashMap<String, String> getConfigValues() {
-        return configValues;
+    public String getReturnMail() {
+        return returnMail;
     }
 
+    public String getRunPos() {
+        return runPos;
+    }
+
+    public RunTypes getRuntype() {
+        return runtype;
+    }
+
+    public String getSrcRoot() {
+        return srcRoot;
+    }
+
+
+
+
     public APIConfig() throws IOException {
-        this.configValues = new HashMap<>();
 
         this.configFile = new File(this.configFP);
         if (this.configFile.createNewFile()){
             // if no config make the file and write defaults
-            this.configValues.put("retMail", this.defaultReturnMail);
-            this.configValues.put("runPos", this.defaultRunPos);
-            this.configValues.put("runType", this.defaultRuntype);
+            this.returnMail = this.defaultReturnMail;
+            this.runPos     = this.defaultRunPos;
+            this.runtype    = this.defaultRuntype;
+            this.srcRoot    = this.defultSrcRoot;
 
-            JSONObject js = new JSONObject(this.configFile);
-            FileWriter writer = new FileWriter(this.configFile);
-            writer.write(js.toString());
-            writer.close();
+            this.saveConfig();
+
         } else {
             FileReader reader = new FileReader(this.configFile);
             JSONObject obj = new JSONObject(reader.read());
 
-            this.configValues.put("retMail", obj.get("retMail").toString());
-            this.configValues.put("runPos", obj.get("runPos").toString());
-            this.configValues.put("runType", obj.get("runType").toString());
+            this.returnMail = obj.get(ConfigEnum.ReturnMail.name()).toString();
+            this.runPos     = obj.get(ConfigEnum.RunPos.name()).toString();
+            this.runtype    = RunTypes.valueOf(obj.get(ConfigEnum.RunType.name()).toString());
+            this.srcRoot    = obj.get(ConfigEnum.SrcRoot.name()).toString();
         }
+
+    }
+
+    private void saveConfig() throws IOException{
+        JSONObject js = new JSONObject();
+
+        js.put(ConfigEnum.ReturnMail.name(), this.returnMail);
+        js.put(ConfigEnum.RunPos.name(), this.runPos);
+        js.put(ConfigEnum.RunType.name(), this.runtype);
+        js.put(ConfigEnum.SrcRoot.name(), this.srcRoot);
+
+
+        FileWriter writer = new FileWriter(this.configFile);
+        writer.write(js.toString());
+        writer.close();
 
     }
 
