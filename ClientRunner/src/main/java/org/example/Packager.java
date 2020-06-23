@@ -1,20 +1,15 @@
 package org.example;
 
 import org.example.enums.RunTypes;
-import org.example.util.Zipper;
+import org.example.util.Compression;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public  class Packager {
-    private static File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+    private static final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 
     /**
      * Gunzip's the files specified in the provided config and puts them
@@ -23,21 +18,22 @@ public  class Packager {
      * @return A file object pointing to the packaged file
      */
     public static File packageDir(APIConfig config)throws FileNotFoundException, IOException {
-        String zipFileName = Packager.tmpDir + "/remote_run.zip";
-        String gzipFileName = Packager.tmpDir + "/remote_run.gzip";
+        File zipFileName = new File(Packager.tmpDir + "/remote_run.zip");
+        File gzipFileName = new File(Packager.tmpDir + "/remote_run.gzip");
         FileOutputStream fileOutputStream = new FileOutputStream(zipFileName);
-        ZipOutputStream stream = new ZipOutputStream(fileOutputStream);
-        stream.putNextEntry(new ZipEntry("/config"));
-        Zipper
+        ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+        zipOutputStream.setLevel(Deflater.NO_COMPRESSION);
 
-        if (config.getRuntype() == RunTypes.JAVA){
-            .add(new File(config.getSrcRoot()));
-        } else if (config.getRuntype() == RunTypes.PYTHON){
+        Compression.zip(new File(config.configFP), zipOutputStream, "/config");
+        Compression.zip(new File(config.getRunPos()), zipOutputStream, "/run");
 
-        }
+        zipOutputStream.close();
+        fileOutputStream.close();
+
+        Compression.gZip(zipFileName,gzipFileName);
 
 
-        return null;
+        return gzipFileName;
 
     }
 
