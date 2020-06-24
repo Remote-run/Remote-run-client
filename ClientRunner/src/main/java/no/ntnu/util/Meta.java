@@ -1,4 +1,4 @@
-package org.example.util;
+package no.ntnu.util;
 
 import java.io.*;
 import java.util.*;
@@ -16,7 +16,7 @@ public class Meta {
      */
     public static ClassPath[] probeForClassPath(File startNode){
         // thread safing the list, becaus we are only adding this is'nt strictly neccecery
-        List<ClassPath> retunlist = (Collections.synchronizedList(new ArrayList<>()) ) ;
+        List<ClassPath> retunlist = (Collections.synchronizedList(new ArrayList<ClassPath>()));
         if (startNode.isDirectory()){
             Meta.recursiveProbe(startNode, retunlist);
         }

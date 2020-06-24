@@ -1,4 +1,4 @@
-package org.example;
+package no.ntnu;
 
 import static org.junit.Assert.assertTrue;
 

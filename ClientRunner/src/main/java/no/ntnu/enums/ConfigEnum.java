@@ -1,4 +1,4 @@
-package org.example.enums;
+package no.ntnu.enums;
 
 public enum ConfigEnum {
 

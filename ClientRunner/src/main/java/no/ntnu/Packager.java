@@ -1,11 +1,9 @@
-package org.example;
+package no.ntnu;
 
-import org.example.enums.RunTypes;
-import org.example.util.Compression;
+import no.ntnu.util.Compression;
 
 import java.io.*;
 import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public  class Packager {

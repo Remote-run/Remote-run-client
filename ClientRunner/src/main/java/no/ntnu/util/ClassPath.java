@@ -1,4 +1,4 @@
-package org.example.util;
+package no.ntnu.util;
 
 import java.io.File;
 

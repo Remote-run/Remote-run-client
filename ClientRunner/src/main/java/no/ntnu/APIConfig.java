@@ -1,13 +1,12 @@
-package org.example;
+package no.ntnu;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
-import org.example.enums.ConfigEnum;
-import org.example.enums.RunTypes;
+import no.ntnu.enums.ConfigEnum;
+import no.ntnu.enums.RunTypes;
 import org.json.JSONObject;
 
 public class APIConfig {
@@ -27,7 +26,7 @@ public class APIConfig {
 
 
     private File configFile;
-    public final String configFP = new File("./.apiconfig").getAbsolutePath();
+    public final String configFP = new File("./.apiconfig").getCanonicalPath();
 
     public String getReturnMail() {
         return returnMail;
@@ -63,6 +62,7 @@ public class APIConfig {
         } else {
             FileReader reader = new FileReader(this.configFile);
             JSONObject obj = new JSONObject(reader.read());
+
 
             this.returnMail = obj.get(ConfigEnum.ReturnMail.name()).toString();
             this.runPos     = obj.get(ConfigEnum.RunPos.name()).toString();

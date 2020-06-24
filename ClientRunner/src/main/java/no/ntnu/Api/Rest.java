@@ -1,4 +1,4 @@
-package org.example.Api;
+package no.ntnu.Api;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

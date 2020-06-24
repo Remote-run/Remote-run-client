@@ -1,6 +1,6 @@
-package org.example;
+package no.ntnu;
 
-import org.example.util.Compression;
+import no.ntnu.util.Compression;
 
 import java.io.File;
 

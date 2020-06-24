@@ -1,10 +1,7 @@
-package org.example.util;
+package no.ntnu.util;
 
-import javax.swing.*;
 import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Path;
-import java.util.BitSet;
 import java.util.zip.*;
 
 // todo: this class sorly needs cleanup and polish
