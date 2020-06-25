@@ -1,8 +1,10 @@
 package no.ntnu;
 
+import no.ntnu.Api.Rest;
 import no.ntnu.util.Compression;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * Hello world!
@@ -16,23 +18,18 @@ public class App
             System.out.println("Hello World!");
             //ArrayList<ClassPath> ret = new ArrayList(Arrays.asList(Meta.probeForClassPath(new File("/home/trygve/dev/projects/PredatorPreySimulation/src"))));
             //ret.forEach(classPath -> System.out.println(classPath.asDotFormat()));
-            File testUncompressedDir = new File("/home/trygve/tmp/RemoteProj_testing/ziptesting/toziptestsak");
-            File testUncompressedFile = new File("/home/trygve/tmp/RemoteProj_testing/ziptesting/abc");
+            File testUncompressedDir = new File("/home/trygve/Development/projects/run-on-server-java-dl4j-example");
 
             File testbase = new File("/home/trygve/tmp/RemoteProj_testing/ziptesting/");
 
             System.out.println(testbase.getCanonicalPath());
-            Compression.gZip(testUncompressedFile, new File(testbase.getCanonicalPath() + File.separator + "fil.gzip"));
-            Compression.gZip(testUncompressedDir, new File(testbase.getCanonicalPath() + File.separator + "dir.gzip"));
+            File outfile = new File("/tmp/test.gzip");
+            Compression.gZip(testUncompressedDir, outfile );
+            //Compression.unzip(new File(testbase.getCanonicalPath() + File.separator + "dir.gzip"), new File(testbase.getCanonicalFile() + File.separator + "out/" ));
 
-            Compression.zip(testUncompressedFile, new File(testbase.getCanonicalPath() + File.separator + "fil.zip"));
-            Compression.zip(testUncompressedDir, new File(testbase.getCanonicalPath() + File.separator + "dir.zip"));
+            Rest.testSendFile(outfile);
 
-            Compression.unzip(new File(testbase.getCanonicalPath() + File.separator + "fil.gzip"), new File("/home/trygve/tmp/RemoteProj_testing/ziptesting/out"));
-            Compression.unzip(new File(testbase.getCanonicalPath() + File.separator + "dir.gzip"), new File("/home/trygve/tmp/RemoteProj_testing/ziptesting/out"));
 
-            Compression.unzip(new File(testbase.getCanonicalPath() + File.separator + "fil.zip"), new File("/home/trygve/tmp/RemoteProj_testing/ziptesting/out"));
-            Compression.unzip(new File(testbase.getCanonicalPath() + File.separator + "dir.zip"), new File("/home/trygve/tmp/RemoteProj_testing/ziptesting/out"));
 
         }catch (Exception e){e.printStackTrace();}
 

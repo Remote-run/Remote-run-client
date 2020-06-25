@@ -50,6 +50,8 @@ public class APIConfig {
     public APIConfig() throws IOException {
 
         this.configFile = new File(this.configFP);
+
+
         if (this.configFile.createNewFile()){
             // if no config make the file and write defaults
             this.returnMail = this.defaultReturnMail;

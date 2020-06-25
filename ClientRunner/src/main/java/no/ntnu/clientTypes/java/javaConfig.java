@@ -9,5 +9,4 @@ public class javaConfig {
 
     }
 
-    private HashMap
 }

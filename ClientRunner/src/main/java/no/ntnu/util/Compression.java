@@ -50,7 +50,7 @@ public class Compression {
 
     public static void gZip(File filePath, File outPath) throws IOException{
         outPath = (outPath == null) ? new File(filePath.getCanonicalPath() + ".gzip"): outPath;
-        if (outPath.exists()) throw new FileAlreadyExistsException("Zip file alredy exists");
+        //if (outPath.exists()) throw new FileAlreadyExistsException("Zip file alredy exists");
         if (!filePath.exists()) throw new IOException("Zip target not found");
 
 
