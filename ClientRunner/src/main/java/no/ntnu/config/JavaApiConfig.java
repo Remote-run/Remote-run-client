@@ -1,5 +1,6 @@
 package no.ntnu.config;
 
+import no.ntnu.enums.RunType;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -13,6 +14,7 @@ public class JavaApiConfig extends ApiConfig {
     public JavaApiConfig() {
         super();
         buildConfig();
+        this.setRunType(RunType.JAVA);
     }
 
     public JavaApiConfig(File configFile) {

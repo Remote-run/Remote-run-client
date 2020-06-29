@@ -51,7 +51,12 @@ public abstract class ApiConfig {
 
     protected ArrayList<File> packingList = new ArrayList<>();
 
-
+    private enum configParams {
+        packingList,
+        returnMail,
+        runType,
+        priority,
+    }
 
     protected String returnMail = "mail";
     protected RunType runType = RunType.UNDEFINED;
@@ -76,6 +81,7 @@ public abstract class ApiConfig {
         return returnMail;
     }
 
+
     public void setReturnMail(String returnMail) {
         this.returnMail = returnMail;
         writeConfig();
@@ -93,7 +99,7 @@ public abstract class ApiConfig {
         return ret;
     }
 
-    private void  setRunType(RunType runType){
+    protected void  setRunType(RunType runType){
         this.runType = runType;
         writeConfig();
     }
@@ -105,13 +111,6 @@ public abstract class ApiConfig {
     public void setPriority(int priority){
         this.priority = priority;
         writeConfig();
-    }
-
-    private enum configParams {
-        packingList,
-        returnMail,
-        runType,
-        priority,
     }
 
 
@@ -148,6 +147,15 @@ public abstract class ApiConfig {
 
         return retObj;
     }
+
+    protected String getDisplaySting(){
+        String displayStr =
+                String.format(" Run type:    \t  %s", this.getRunType().name()) +
+                String.format(" Return Mail: \t  %s", this.getReturnMail()) +
+                String.format(" Priority:    \t  %o", this.getPriority());
+        return displayStr;
+    }
+
 
     protected abstract void readConfig();
 
