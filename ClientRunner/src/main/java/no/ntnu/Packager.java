@@ -1,5 +1,6 @@
 package no.ntnu;
 
+import no.ntnu.config.ApiConfig;
 import no.ntnu.util.Compression;
 
 import java.io.*;
@@ -15,21 +16,24 @@ public  class Packager {
      * @param config the config dict
      * @return A file object pointing to the packaged file
      */
-    public static File packageDir(APIConfig config)throws FileNotFoundException, IOException {
+    public static File packageDir(ApiConfig config)throws FileNotFoundException, IOException {
         File zipFileName = new File(Packager.tmpDir + "/remote_run.zip");
         File gzipFileName = new File(Packager.tmpDir + "/remote_run.gzip");
         FileOutputStream fileOutputStream = new FileOutputStream(zipFileName);
         ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
         zipOutputStream.setLevel(Deflater.NO_COMPRESSION);
 
-        Compression.zip(new File(config.configFP), zipOutputStream, "/config");
-        Compression.zip(new File(config.getRunPos()), zipOutputStream, "/run");
+        config.getPackingList()
+                .forEach(file -> {
+                    try {
+                        Compression.zip(file, zipOutputStream, file.getName());
+                    } catch (IOException ignored){}
+                });
 
         zipOutputStream.close();
         fileOutputStream.close();
 
         Compression.gZip(zipFileName,gzipFileName);
-
 
         return gzipFileName;
 

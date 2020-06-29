@@ -1,6 +1,7 @@
 package no.ntnu.enums;
 
-public enum RunTypes {
+public enum RunType {
+    UNDEFINED,
     JAVA,
     PYTHON,
 }

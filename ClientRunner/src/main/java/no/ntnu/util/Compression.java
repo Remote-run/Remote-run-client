@@ -5,7 +5,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.util.zip.*;
 
 // todo: this class sorly needs cleanup and polish
-// TODO: Realy neds option for progress bar compression somtimes takes long
 public class Compression {
     private static final File systemTmpDir = new File(System.getProperty("java.io.tmpdir"));
 
@@ -57,7 +56,7 @@ public class Compression {
 
         File compressTarget = filePath;
         if (filePath.isDirectory()){
-            File tmpZipFile = new File(Compression.systemTmpDir, filePath.getName() + ".zip");
+            File tmpZipFile = new File(Compression.systemTmpDir, filePath.getName());
             ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(tmpZipFile));
             zipOutputStream.setLevel(Deflater.NO_COMPRESSION); // using the zip as a tar
             Compression.zipDirectory(filePath, tmpZipFile.getName(), zipOutputStream);
@@ -88,8 +87,8 @@ public class Compression {
     }
 
     // -- private
-    private static File getPathWithoutEnding(File file){
-        return new File(file.getName().substring(0, file.getName().lastIndexOf(".") - 1));
+    private static File getPathWithoutEnding(File file) throws  IOException{
+        return new File(file.getCanonicalPath().substring(0, file.getCanonicalPath().lastIndexOf(".")));
 
     }
 
