@@ -7,22 +7,11 @@ import java.util.Scanner;
 
 public class Runner {
 
-    protected File getConfigFIle(){
-        File configfile = null;
-        try {
-
-            //configfile = new File(ApiConfig.)
-        } catch (Exception e){
-
-        }
-        return null;
-    }
-
-    protected boolean isMailValid(ApiConfig config){
+    protected static boolean isMailValid(ApiConfig config){
         return !config.getReturnMail().contains("@");
     }
 
-    protected String queryForMail(){
+    protected static String queryForMail(){
         Scanner scanner = new Scanner(System.in);
         System.out.println("\n--------------------------------");
         System.out.println("    Config");
@@ -32,6 +21,5 @@ public class Runner {
         String input = scanner.nextLine();
         scanner.close();
         return input;
-
     }
 }

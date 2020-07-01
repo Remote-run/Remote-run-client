@@ -14,8 +14,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.14</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>14</maven.compiler.source>
+    <maven.compiler.target>14</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -79,7 +79,7 @@
             <archive>
               <manifest>
                 <addClasspath>true</addClasspath>
-                <mainClass>no.ntnu.App</mainClass>
+                <mainClass>no.ntnu.runner.JavaRunner</mainClass>
               </manifest>
             </archive>
           </configuration>
