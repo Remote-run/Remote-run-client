@@ -42,6 +42,10 @@ public class Rest {
                 final HttpEntity resEntity = response.getEntity();
                 if (resEntity != null) {
                     System.out.println("Response content length: " + resEntity.getContentLength());
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(resEntity.getContent()));
+
+                    reader.lines().forEach(line -> System.out.println(line));
+                    reader.close();
                 }
                 EntityUtils.consume(resEntity);
             }

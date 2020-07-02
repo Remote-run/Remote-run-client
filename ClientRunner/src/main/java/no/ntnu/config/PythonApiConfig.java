@@ -9,18 +9,34 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+public class PythonApiConfig extends ApiConfig {
 
-public class JavaApiConfig extends ApiConfig {
 
-    public JavaApiConfig() {
-        super();
-        buildConfig();
-        this.setRunType(RunType.JAVA);
+
+    private String runString = "no runstring set";
+
+    private enum pythonConfigParams{
+        runString
     }
 
-    public JavaApiConfig(File configFile) {
+    public PythonApiConfig() {
+        super();
+        buildConfig();
+        this.setRunType(RunType.PYTHON);
+    }
+
+    public PythonApiConfig(File configFile) {
         super(configFile);
         buildConfig();
+    }
+
+    public String getRunString() {
+        return runString;
+    }
+
+    public void setRunString(String runString) {
+        this.runString = runString;
+        writeConfig();
     }
 
     private void buildConfig(){
@@ -35,6 +51,7 @@ public class JavaApiConfig extends ApiConfig {
                 FileReader reader = new FileReader(configFile);
                 JSONObject loadObject = (JSONObject) jsonParser.parse(reader);
                 super.readCommonJsonObj(loadObject);
+                this.runString = (String) loadObject.get(pythonConfigParams.runString.name());
                 reader.close();
             } catch (Exception e){
                 System.out.println("ERROR READING CONFIG: " + e.getMessage());
@@ -53,6 +70,7 @@ public class JavaApiConfig extends ApiConfig {
         try {
             FileWriter writer = new FileWriter(configFile);
             JSONObject saveObject = super.writeCommonJsonObj();
+            saveObject.put(pythonConfigParams.runString.name(), this.runString);
             writer.write(saveObject.toString());
             writer.close();
 

@@ -6,8 +6,15 @@ import java.util.zip.*;
 
 // todo: this class sorly needs cleanup and polish
 public class Compression {
-    private static final File systemTmpDir = new File(System.getProperty("java.io.tmpdir"));
-
+    //private static final File systemTmpDir = new File(System.getProperty("java.io.tmpdir"));
+    private static File systemTmpDir(){
+        try {
+            return new File(System.getProperty("java.io.tmpdir"));
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
     public static void zip(File filePath) throws IOException{
         Compression.zip(filePath, null);
     }
@@ -56,7 +63,7 @@ public class Compression {
 
         File compressTarget = filePath;
         if (filePath.isDirectory()){
-            File tmpZipFile = new File(Compression.systemTmpDir, filePath.getName());
+            File tmpZipFile = new File(Compression.systemTmpDir(), filePath.getName());
             ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(tmpZipFile));
             zipOutputStream.setLevel(Deflater.NO_COMPRESSION); // using the zip as a tar
             Compression.zipDirectory(filePath, tmpZipFile.getName(), zipOutputStream);
@@ -78,7 +85,7 @@ public class Compression {
         }
 
         if (filePath.getName().endsWith(".gzip")){
-            File tmpZipFile = new File(Compression.systemTmpDir.getCanonicalPath() + File.separator  + filePath.getName().substring(0,".gzip".length() + 1));
+            File tmpZipFile = new File(Compression.systemTmpDir().getCanonicalPath() + File.separator  + filePath.getName().substring(0,".gzip".length() + 1));
             gzipFileDecompress(filePath, tmpZipFile);
             _unzip(tmpZipFile, outDir);
         }else {
