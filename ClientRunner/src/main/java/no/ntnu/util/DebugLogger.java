@@ -35,7 +35,7 @@ public class DebugLogger {
         if (this.print) {
             StackTraceElement tracePos = this.getCallerStackPoisson();
 
-            String printString = Stream.of(tolog).map(Objects::toString).collect(Collectors.joining());
+            String printString = Stream.of(tolog).map(Objects::toString).collect(Collectors.joining(" "));
             System.out.printf("%-70s",printString);
 
             if (tracePos != null){

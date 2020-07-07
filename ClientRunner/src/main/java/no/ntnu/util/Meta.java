@@ -15,8 +15,8 @@ public class Meta {
      * @return returns a array with ClassPath objects
      */
     public static ClassPath[] probeForClassPath(File startNode){
-        // thread safing the list, becaus we are only adding this is'nt strictly neccecery
-        List<ClassPath> retunlist = (Collections.synchronizedList(new ArrayList<ClassPath>()));
+        // thread safing the list, because we are only adding this is'nt strictly neccecery
+        List<ClassPath> retunlist = (Collections.synchronizedList(new ArrayList<>()));
         if (startNode.isDirectory()){
             Meta.recursiveProbe(startNode, retunlist);
         }
