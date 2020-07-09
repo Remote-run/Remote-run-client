@@ -67,9 +67,9 @@ public class DebugLogger {
                 System.out.printf(
                     "- file is directory -\n" +
                     "Num children    : %s\n", file.listFiles().length);
-            }else if(file.isDirectory()){
+            }else if(file.isFile()){
                 System.out.printf(
-                    "- file is file -" +
+                    "- file is file -\n" +
                     "Size             : %s\n", file.length());
             }
 

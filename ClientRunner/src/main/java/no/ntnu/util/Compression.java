@@ -6,6 +6,10 @@ import java.util.zip.*;
 
 // todo: this class sorly needs cleanup and polish
 public class Compression {
+
+    private static DebugLogger dbl = new DebugLogger(true);
+
+
     //private static final File systemTmpDir = new File(System.getProperty("java.io.tmpdir"));
     private static File systemTmpDir(){
         try {
@@ -80,15 +84,24 @@ public class Compression {
 
     public static void unzip(File filePath, File outDir) throws IOException{
         if (outDir == null){
+            dbl.log("no out dir given");
             outDir = Compression.getPathWithoutEnding(filePath);
             outDir.mkdir();
         }
 
-        if (filePath.getName().endsWith(".gzip")){
-            File tmpZipFile = new File(Compression.systemTmpDir().getCanonicalPath() + File.separator  + filePath.getName().substring(0,".gzip".length() + 1));
+
+        if (filePath.getName().endsWith(".gzip") || filePath.getName().endsWith(".gz")){
+            dbl.log("gunzip detected starting unzip");
+
+            File tmpZipFile = new File(Compression.systemTmpDir().getCanonicalPath() + File.separator  + filePath.getName().substring(0,".gzip".length() + 1) );
+            //tmpZipFile.delete();
+            //File tmpZipFile = new File(Compression.systemTmpDir().getCanonicalPath() + File.separator  + filePath.getName());
             gzipFileDecompress(filePath, tmpZipFile);
             _unzip(tmpZipFile, outDir);
+            tmpZipFile.delete();
+            dbl.log("unzip complete");
         }else {
+            dbl.log("normal zip decompress");
             _unzip(filePath, outDir);
         }
     }
@@ -132,6 +145,9 @@ public class Compression {
 
     private static void _unzip(File filePath, File outDir) throws IOException {
         if (!filePath.exists()) throw new IOException("unzip target not found");
+
+        dbl.log("Outfile");
+        dbl.fileLog(outDir);
 
         byte[] buffer = new byte[1024];
 

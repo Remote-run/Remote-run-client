@@ -14,9 +14,11 @@ public class PythonApiConfig extends ApiConfig {
 
 
     private String runString = "no runstring set";
+    private String image = " ";
 
     private enum pythonConfigParams{
-        runString
+        runString,
+        image,
     }
 
     public PythonApiConfig() {

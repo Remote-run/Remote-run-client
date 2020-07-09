@@ -1,16 +1,21 @@
 package no.ntnu;
 
+import no.ntnu.api.Rest;
 import no.ntnu.config.JavaApiConfig;
+import no.ntnu.util.Compression;
 import no.ntnu.util.DebugLogger;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Hello world!
  *
  */
-public class App 
+public class clienttestingstuff
 {
     public static void main( String[] args )
     {
@@ -21,16 +26,6 @@ public class App
             //ret.forEach(classPath -> System.out.println(classPath.asDotFormat()));
             File testUncompressedDir = new File("/home/trygve/Development/projects/run-on-server-java-dl4j-example");
             File pom = new File("/home/trygve/Development/projects/run-on-server-java-dl4j-example");
-
-            ArrayList<String> cars = new ArrayList<String>();
-            cars.add("Volvo");
-            cars.add("BMW");
-            cars.add("Ford");
-            cars.add("Mazda");
-
-            String aa = "aaaaa";
-            int bb = 55;
-            dbg.log(testUncompressedDir, pom, aa, bb, cars);
 
 
             JavaApiConfig config = new JavaApiConfig();
@@ -50,7 +45,31 @@ public class App
             //JavaApiConfig aa = new JavaApiConfig(ApiConfig.configFile);
 
             //File sendfile = Packager.packageDir(config);
+            //Compression.unzip(sendfile, new File("./testout"));
             //Rest.testSendFile(sendfile);
+
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    "ls"
+            );
+
+
+
+            try {
+                //pb.inheritIO();
+                Process p = pb.start();
+                //p.waitFor();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+
+                String line = null;
+                while ((line = bufferedReader.readLine()) != null){
+                    System.out.println("aaa");
+                    System.out.println(line);
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
 
 
 

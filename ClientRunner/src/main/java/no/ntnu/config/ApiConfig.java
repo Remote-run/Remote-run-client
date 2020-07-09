@@ -46,7 +46,8 @@ brainstorming hva trenger jeg
  */
 public abstract class ApiConfig {
 
-    public static File configFile = new File(".config");
+    public static final String commonConfigName = ".config";
+    public static File configFile = new File(commonConfigName);
 
 
     protected ArrayList<File> packingList = new ArrayList<>();
@@ -65,7 +66,12 @@ public abstract class ApiConfig {
     public ApiConfig() {}
 
     public ApiConfig(File configFile) {
-        this.configFile = configFile;
+        if (configFile.isFile()){
+            this.configFile = configFile;
+        } else {
+            this.configFile = new File(configFile,commonConfigName);
+        }
+
     }
 
     public ArrayList<File> getPackingList() {
