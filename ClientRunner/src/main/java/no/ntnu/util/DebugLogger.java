@@ -26,6 +26,12 @@ public class DebugLogger {
         this.print = print;
     }
 
+    public void log(){
+        if (this.print) {
+            this.log("<ping>");
+        }
+    }
+
     /**
      * prints arbitrary list of objects using the objects toString method
      * the location where the print statement where printed from is also shown.
@@ -49,6 +55,8 @@ public class DebugLogger {
             }
         }
     }
+
+
 
     /**
      * A more specilized loggging for files where the file name, parent, type and so on is shown.

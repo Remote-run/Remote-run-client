@@ -44,32 +44,10 @@ public class clienttestingstuff
 
             //JavaApiConfig aa = new JavaApiConfig(ApiConfig.configFile);
 
-            //File sendfile = Packager.packageDir(config);
-            //Compression.unzip(sendfile, new File("./testout"));
-            //Rest.testSendFile(sendfile);
+            File sendfile = Packager.packageDir(config);
+            Compression.unzip(sendfile, new File("./testout"));
+            Rest.testSendFile(sendfile);
 
-
-            ProcessBuilder pb = new ProcessBuilder(
-                    "ls"
-            );
-
-
-
-            try {
-                //pb.inheritIO();
-                Process p = pb.start();
-                //p.waitFor();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-
-                String line = null;
-                while ((line = bufferedReader.readLine()) != null){
-                    System.out.println("aaa");
-                    System.out.println(line);
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
 
 
 

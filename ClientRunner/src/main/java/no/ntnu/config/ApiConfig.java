@@ -87,6 +87,15 @@ public abstract class ApiConfig {
         return returnMail;
     }
 
+    public static String getReturnMail(File configFile) throws ParseException, IOException {
+        FileReader reader = new FileReader(configFile);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
+        String ret = (String) jsonObject.get(configParams.returnMail.name());
+        reader.close();
+        return ret;
+    }
+
 
     public void setReturnMail(String returnMail) {
         this.returnMail = returnMail;
