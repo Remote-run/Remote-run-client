@@ -4,27 +4,67 @@ import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.zip.*;
 
-// todo: this class sorly needs cleanup and polish
+/*
+TODO:   lots of stuff to do here.
+            1. doble check every exeption that gets thrown her what can be handled and are there any plase that wold benefit from a comment in the exeption
+            2. zipping files shold have an option to owerwrite or abc(2).zip the files
+                2.5. maby add functionallyty to unzip a abc(2).zip -> abc not abc(2)
+            3. document everything
+
+
+
+
+ */
+
+
+
+
+/**
+ * Utillety class for compressing and decompressing files and dirs
+ */
 public class Compression {
 
     private static DebugLogger dbl = new DebugLogger(true);
 
 
-    //private static final File systemTmpDir = new File(System.getProperty("java.io.tmpdir"));
-    private static File systemTmpDir(){
-        try {
-            return new File(System.getProperty("java.io.tmpdir"));
-        } catch (Exception e){
-            e.printStackTrace();
+    private static final File systemTmpDir = new File(System.getProperty("java.io.tmpdir"));
+
+    private static File getFirstFreeName(File wishedName, String endTag) throws IOException{
+
+        File freeName;
+        if (wishedName.exists()){
+            int increment = 0;
+
+            String maybePath = wishedName.getCanonicalPath() + "(%u)" + endTag;
+            while (new File(String.format(maybePath,increment)).exists()){
+                increment ++;
+            }
+            freeName = new File(String.format(maybePath,increment));
+        }else {
+            freeName = wishedName;
         }
-        return null;
+
+        return freeName;
     }
-    public static void zip(File filePath) throws IOException{
-        Compression.zip(filePath, null);
+
+
+    /**
+     * Zips the file/dir at the given file path to a file
+     * @param filePath
+     * @throws IOException
+     */
+    public static File zip(File filePath) throws IOException{
+        String maybePath = filePath.getCanonicalPath() + "%s.zip";
+        String increment = "";
+        while (new File(String.format(maybePath,increment)).exists()){
+            increment = (increment.equals(""))? "1" : String.valueOf(Integer.parseInt(increment) + 1);
+        }
+        File outFile = new File(String.format(maybePath,increment));
+        Compression.zip(filePath, outFile);
+        return outFile;
     }
 
     public static void zip(File filePath, File outPath) throws IOException{
-        outPath = (outPath == null) ? new File(filePath.getCanonicalPath() + ".zip"): outPath;
         if (outPath.exists()) throw new FileAlreadyExistsException("Zip file alredy exists");
         if (!filePath.exists()) throw new IOException("Zip target not found");
 
@@ -67,7 +107,7 @@ public class Compression {
 
         File compressTarget = filePath;
         if (filePath.isDirectory()){
-            File tmpZipFile = new File(Compression.systemTmpDir(), filePath.getName());
+            File tmpZipFile = new File(Compression.systemTmpDir, filePath.getName());
             ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(tmpZipFile));
             zipOutputStream.setLevel(Deflater.NO_COMPRESSION); // using the zip as a tar
             Compression.zipDirectory(filePath, tmpZipFile.getName(), zipOutputStream);
@@ -93,7 +133,7 @@ public class Compression {
         if (filePath.getName().endsWith(".gzip") || filePath.getName().endsWith(".gz")){
             dbl.log("gunzip detected starting unzip");
 
-            File tmpZipFile = new File(Compression.systemTmpDir().getCanonicalPath() + File.separator  + filePath.getName().substring(0,".gzip".length() + 1) );
+            File tmpZipFile = new File(Compression.systemTmpDir.getCanonicalPath() + File.separator  + filePath.getName().substring(0,".gzip".length() + 1) );
             //tmpZipFile.delete();
             //File tmpZipFile = new File(Compression.systemTmpDir().getCanonicalPath() + File.separator  + filePath.getName());
             gzipFileDecompress(filePath, tmpZipFile);

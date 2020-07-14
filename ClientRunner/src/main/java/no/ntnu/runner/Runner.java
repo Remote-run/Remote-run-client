@@ -5,7 +5,17 @@ import no.ntnu.config.ApiConfig;
 import java.io.File;
 import java.util.Scanner;
 
-public class Runner {
+public abstract class Runner {
+
+    /*
+
+    TODO:     I am like 43% shure that in the OOP subject i made a general cli input handler, if so find it 
+
+
+     */
+
+
+
 
     protected static boolean isMailValid(ApiConfig config){
         return !config.getReturnMail().contains("@");

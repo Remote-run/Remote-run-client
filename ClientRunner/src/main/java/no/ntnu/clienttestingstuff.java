@@ -45,7 +45,7 @@ public class clienttestingstuff
             //JavaApiConfig aa = new JavaApiConfig(ApiConfig.configFile);
 
             File sendfile = Packager.packageDir(config);
-            Compression.unzip(sendfile, new File("./testout"));
+            //Compression.unzip(sendfile, new File("./testout"));
             Rest.testSendFile(sendfile);
 
 

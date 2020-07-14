@@ -13,9 +13,8 @@ import java.io.IOException;
 public class JavaApiConfig extends ApiConfig {
 
     public JavaApiConfig() {
-        super();
+        super(RunType.JAVA);
         buildConfig();
-        this.setRunType(RunType.JAVA);
     }
 
     public JavaApiConfig(File configFile) {
