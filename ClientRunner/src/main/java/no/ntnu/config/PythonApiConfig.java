@@ -1,5 +1,9 @@
 package no.ntnu.config;
 
+import no.ntnu.config.configBuilder.ConfigFileParam;
+import no.ntnu.config.configBuilder.ConfigIntParam;
+import no.ntnu.config.configBuilder.ConfigParam;
+import no.ntnu.config.configBuilder.ConfigStringParam;
 import no.ntnu.enums.RunType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,9 +17,9 @@ public class PythonApiConfig extends ApiConfig {
 
 
 
-    private File fileToExecute;
-    private String executionArgs;
-    private String image;
+    private File fileToExecute = new File("main.py");
+    private String executionArgs = "";
+    private String image = "nvidia/cuda:10.1-runtime";
 
     private enum pythonConfigParams{
         fileToExecute,
@@ -104,9 +108,11 @@ public class PythonApiConfig extends ApiConfig {
             } catch (Exception e){
                 System.out.println("ERROR READING CONFIG: " + e.getMessage());
                 System.out.println("Using defaults");
+                super.runType = RunType.PYTHON;
                 writeConfig();
             }
         } else {
+            super.runType = RunType.PYTHON;
             writeConfig();
         }
 
@@ -133,5 +139,15 @@ public class PythonApiConfig extends ApiConfig {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    protected ConfigParam[] getRunTypeConfigRows() {
+        ConfigParam[] rows = new ConfigParam[]{
+                new ConfigStringParam("Image", this::getImage,this::setImage),
+                new ConfigFileParam("File To execute", this::getFileToExecute, this::setFileToExecute),
+                new ConfigStringParam("Execution args", this::getExecutionArgs, this::setExecutionArgs)
+        };
+        return rows;
     }
 }

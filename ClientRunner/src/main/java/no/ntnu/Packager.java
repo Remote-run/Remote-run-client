@@ -8,6 +8,7 @@ import java.util.zip.Deflater;
 import java.util.zip.ZipOutputStream;
 
 public  class Packager {
+    /*
     private static final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 
     /**
@@ -15,7 +16,7 @@ public  class Packager {
      * in the system tmp dir
      * @param config the config dict
      * @return A file object pointing to the packaged file
-     */
+
     public static File packageDir(ApiConfig config)throws FileNotFoundException, IOException {
         File zipFileName = new File(Packager.tmpDir + "/remote_run.zip");
         File gzipFileName = new File(Packager.tmpDir + "/remote_run.gzip");
@@ -38,7 +39,7 @@ public  class Packager {
         return gzipFileName;
 
     }
-
+    */
 
 
 

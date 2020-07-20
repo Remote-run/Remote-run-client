@@ -1,7 +1,11 @@
 package no.ntnu.config;
 
+import no.ntnu.config.configBuilder.ConfigIntParam;
+import no.ntnu.config.configBuilder.ConfigParam;
+import no.ntnu.config.configBuilder.ConfigStringParam;
 import no.ntnu.enums.RunType;
 
+import no.ntnu.ui.cli.Column;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -12,7 +16,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
 brainstorming hva trenger jeg
@@ -50,15 +56,13 @@ public abstract class ApiConfig {
     public static final String commonConfigName = ".config";
     public static File configFile = new File(commonConfigName);
 
-    // possibly remove this an just take the entire parent dir
-    protected ArrayList<File> packingList = new ArrayList<>();
+
 
     /**
      * the indexes used for saving the config.
      * this is purly to avoid having to hunt and peck i decide to change theese later
      */
     private enum configParams {
-        packingList,
         returnMail,
         runType,
         priority,
@@ -89,22 +93,6 @@ public abstract class ApiConfig {
 
     }
 
-    /**
-     * Returns the list of the files and dirs to include in package sent to the server.
-     * @return The list of the files and dirs to include in package sent to the server.
-     */
-    public ArrayList<File> getPackingList() {
-        return packingList;
-    }
-
-    /**
-     * Sets the list of the files and dirs to include in package sent to the server.
-     * @param packingList The list of the files and dirs to include in package sent to the server.
-     */
-    public void setPackingList(ArrayList<File> packingList) {
-        this.packingList = packingList;
-        writeConfig();
-    }
 
     /**
      * Returns the return mail for the user.
@@ -186,14 +174,6 @@ public abstract class ApiConfig {
      * @param jsonObject the json object to read from.
      */
     protected void readCommonJsonObj(JSONObject jsonObject)  {
-        this.packingList.clear();
-        ((JSONArray) jsonObject.get(configParams.packingList.name()))
-                .forEach(stringPath -> {
-                    File maybeFile = new File((String) stringPath);
-                    if (maybeFile.exists())
-                        this.packingList.add(maybeFile);
-                });
-
         this.returnMail = (String) jsonObject.get(configParams.returnMail.name());
         this.runType = RunType.valueOf((String) jsonObject.get(configParams.runType.name()));
         this.priority = ((Long) jsonObject.get(configParams.priority.name())).intValue();
@@ -207,33 +187,12 @@ public abstract class ApiConfig {
     protected JSONObject writeCommonJsonObj() throws IOException {
         JSONObject retObj = new JSONObject();
 
-        JSONArray packingList = new JSONArray();
-        packingList.addAll(this.packingList
-                .stream()
-                .filter(file -> file.exists())
-                .map(file -> {
-                    try{
-                        return file.getCanonicalPath();
-                    }catch (Exception e){ return null;} // this wil never happen because of the filter above
-                }).collect(Collectors.toCollection(ArrayList::new)));
-
-
-        retObj.put(configParams.packingList.name(), packingList);
         retObj.put(configParams.returnMail.name(), this.returnMail);
         retObj.put(configParams.runType.name(), this.runType.name());
         retObj.put(configParams.priority.name(), this.priority);
 
         return retObj;
     }
-
-    protected String getDisplaySting(){
-        String displayStr =
-                String.format(" Run type:    \t  %s", this.getRunType().name()) +
-                String.format(" Return Mail: \t  %s", this.getReturnMail()) +
-                String.format(" Priority:    \t  %o", this.getPriority());
-        return displayStr;
-    }
-
 
     /**
      * Read the config from the default config file
@@ -244,5 +203,28 @@ public abstract class ApiConfig {
      * Write the config to the config file
      */
     protected abstract void writeConfig();
+
+    /**
+     * Shows the user the current config
+     */
+    protected abstract ConfigParam[] getRunTypeConfigRows();
+
+
+    public ConfigParam[] getConfigRows(){
+        ConfigParam[] rows = new ConfigParam[]{
+                new ConfigIntParam("Priority", this::getPriority,this::setPriority),
+                new ConfigStringParam("Runtype", () -> this.getRunType().name(), s -> {}),
+                new ConfigStringParam("Return mail", this::getReturnMail, this::setReturnMail)
+        };
+
+
+        return Stream.of(rows, getRunTypeConfigRows()).flatMap(Stream::of).toArray(ConfigParam[]::new);
+    }
+
+    protected void userConfigBuild(){
+
+    }
+
+
 
 }

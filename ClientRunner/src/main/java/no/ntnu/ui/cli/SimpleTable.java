@@ -226,7 +226,7 @@ public class SimpleTable<T> {
             return;
         }
         if (!tableItems.isEmpty()){
-            cols.forEach(c -> c.fitCellSize(tableItems.get(0)));
+            cols.forEach(c -> c.fitCellSize(tableItems));
         }
         this.currentDisplayRow = 0;
 

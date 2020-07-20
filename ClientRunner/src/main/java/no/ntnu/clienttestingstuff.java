@@ -1,7 +1,12 @@
 package no.ntnu;
 
 import no.ntnu.api.Rest;
+import no.ntnu.config.ConfigBuilder;
 import no.ntnu.config.JavaApiConfig;
+import no.ntnu.config.configBuilder.ConfigParam;
+import no.ntnu.config.configBuilder.ConfigStringParam;
+import no.ntnu.ui.cli.Column;
+import no.ntnu.ui.cli.SimpleTable;
 import no.ntnu.util.Compression;
 import no.ntnu.util.DebugLogger;
 
@@ -29,8 +34,26 @@ public class clienttestingstuff
 
 
             JavaApiConfig config = new JavaApiConfig();
-            config.getPackingList().add(testUncompressedDir);
+            //config.getPackingList().add(testUncompressedDir);
+
+            ConfigBuilder.makeUserBuildConfig();
             //System.out.println(config.getPackingList());
+
+            /*
+            SimpleTable<ConfigStringParam> configTable = new SimpleTable<>();
+
+            configTable.setCols(
+                    new Column<>("config type", ConfigStringParam::getConfigName),
+                    new Column<>("Config value", ConfigStringParam::getStringValue)
+            );
+
+            configTable.addItem(new ConfigStringParam("Priority", () -> String.valueOf(config.getPriority()), s -> config.setPriority(Integer.valueOf(s))));
+            configTable.addItem(new ConfigStringParam("return mail", () -> config.getReturnMail(), s -> config.setReturnMail(s)));
+            configTable.addItem(new ConfigStringParam("runtype", () -> config.getRunType().name(), s -> {}));
+
+            configTable.display();
+
+             */
 
             //File testbase = new File("/home/trygve/tmp/RemoteProj_testing/ziptesting/");
 
@@ -44,9 +67,9 @@ public class clienttestingstuff
 
             //JavaApiConfig aa = new JavaApiConfig(ApiConfig.configFile);
 
-            File sendfile = Packager.packageDir(config);
+            //File sendfile = Packager.packageDir(config);
             //Compression.unzip(sendfile, new File("./testout"));
-            Rest.testSendFile(sendfile);
+            //Rest.testSendFile(sendfile);
 
 
 

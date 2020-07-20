@@ -19,10 +19,9 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 public class Rest {
 
-    public static void testSendFile(File sendFile) throws IOException {
+    public static void testSendFile(File sendFile, String url) throws IOException {
         try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
-            final HttpPost httppost = new HttpPost("http://localhost:8080" +
-                    "/com.example.RemoteRunApiServlet/");
+            final HttpPost httppost = new HttpPost(url);
 
             final FileBody gZipfile = new FileBody(sendFile);
             final StringBody comment = new StringBody("Gunzip file", ContentType.TEXT_PLAIN);

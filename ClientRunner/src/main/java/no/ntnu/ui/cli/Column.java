@@ -1,5 +1,6 @@
 package no.ntnu.ui.cli;
 
+import java.util.ArrayList;
 import java.util.function.Function;
 
 /**
@@ -66,14 +67,17 @@ public class Column<T> {
     /**
      * Fits the cell size to the given objects constructed value.
      * if the header width is wider then the constructed value nothing is changed
-     * @param element the element who's value to fit the cell width from
+     * @param elements the collection of elements to get the biggest cell size from
      */
-    void fitCellSize(T element){
+    void fitCellSize(ArrayList<T> elements){
         if (fitCellSize){
-            String testValue = String.valueOf(valueConstructor.apply(element));
-            if (header.length() < testValue.length()){
-                cellSize = testValue.length();
-            }
+            cellSize = header.length();
+            elements.forEach(element -> {
+                String testValue = String.valueOf(valueConstructor.apply(element));
+                if (cellSize < testValue.length()){
+                    cellSize = testValue.length();
+                }
+            });
         }
     }
 

@@ -6,6 +6,15 @@ import java.util.Date;
 import java.util.Scanner;
 
 
+/*
+TODO: - posebillety for alowing empty inputs maby return option
+
+
+
+ */
+
+
+
 /**
  * Provides a simple way to get checked inputs from the user. Can query the user for string, doubles or ints
  * with the possibility for adding upper and lower bounds to the number query.
@@ -38,6 +47,60 @@ public class SimpleUserInput {
             validInput = this.isValidStingInp(returnStr);
         }
         return returnStr;
+    }
+
+    /**
+     * Querys the user with the Qstring for a string input, if no input is provided
+     * null is returned, if allow empty is true, else the user is notified
+     * @param Qstring the query to display to the user
+     * @return the string provided by th user
+     */
+    public String getStingInputt(String Qstring, boolean allowEmpty){
+        if (allowEmpty){
+            System.out.print(Qstring);
+            return scanner.nextLine();
+        } else {
+            return getStingInputt(Qstring);
+        }
+    }
+
+    /**
+     * Querys the user with the Qstring for a string input with a [y/n] appended;
+     * If default true an ampty string wil result in a True beeing returned
+     * @param Qstring the query to display to the user
+     * @param defaultTrue if true an empty string wil return true if false empty wil return false
+     * @return bol indicating whether the user answered y or n
+     */
+    public boolean getYesNoInput(String Qstring, boolean defaultTrue){
+        boolean accept = defaultTrue;
+        boolean validInput = false;
+
+        String ynBox = (defaultTrue)? " [Y/n]: " : " [y/N]: ";
+
+
+
+        while (!validInput){
+            System.out.print(Qstring + ynBox);
+            String returnStr = scanner.nextLine();
+
+            if (!returnStr.isBlank()){
+                if(returnStr.toLowerCase().equals("y")){
+                    accept = true;
+                    validInput = true;
+                } else if(returnStr.toLowerCase().equals("n")){
+                    accept = false;
+                    validInput = true;
+                } else {
+                    System.out.println("invalid input");
+                }
+            } else {
+                // input empty use default
+                validInput = true;
+            }
+        }
+
+
+        return accept;
     }
 
     /**
@@ -179,11 +242,11 @@ public class SimpleUserInput {
                         System.out.printf("input is not within the given range (%3f >)\n", min);
                     }
                 }
-
             }
         }
         return returnDouble;
     }
+
 
     /**
      * Querys the user with the Qstring for a whole (integer) number value, if no input, NAN input,

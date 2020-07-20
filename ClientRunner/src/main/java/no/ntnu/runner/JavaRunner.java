@@ -16,11 +16,11 @@ public class JavaRunner extends Runner{
             config.setReturnMail(queryForMail());
         }
 
-        config.getPackingList().add(JavaApiConfig.configFile.getParentFile());
+        //config.getPackingList().add(JavaApiConfig.configFile.getParentFile());
         try {
-            File zip = Packager.packageDir(config);
+            //File zip = Packager.packageDir(config);
 
-            Rest.testSendFile(zip);
+            //Rest.testSendFile(zip);
         } catch (Exception e){
             e.printStackTrace();
         }

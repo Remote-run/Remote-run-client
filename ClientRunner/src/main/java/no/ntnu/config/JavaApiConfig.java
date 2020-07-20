@@ -1,5 +1,6 @@
 package no.ntnu.config;
 
+import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.enums.RunType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,9 +39,11 @@ public class JavaApiConfig extends ApiConfig {
             } catch (Exception e){
                 System.out.println("ERROR READING CONFIG: " + e.getMessage());
                 System.out.println("Using defaults");
+                super.runType = RunType.JAVA;
                 writeConfig();
             }
         } else {
+            super.runType = RunType.JAVA;
             writeConfig();
         }
 
@@ -59,5 +62,10 @@ public class JavaApiConfig extends ApiConfig {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    protected ConfigParam[] getRunTypeConfigRows() {
+        return new ConfigParam[0];
     }
 }
