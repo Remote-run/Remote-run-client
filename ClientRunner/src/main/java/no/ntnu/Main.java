@@ -19,9 +19,14 @@ public class Main {
 
             try{
 
-                ApiConfig config = switch (ApiConfig.getRunType(configFile)){
-                    case JAVA -> new JavaApiConfig(configFile);
-                    case PYTHON -> new PythonApiConfig(configFile);
+                ApiConfig config = null;
+                switch (ApiConfig.getRunType(configFile)){
+                    case JAVA:
+                        config = new JavaApiConfig(configFile);
+                        break;
+                    case PYTHON:
+                        config = new PythonApiConfig(configFile);
+                        break;
                 };
                 ConfigBuilder.updateConfig(config);
             } catch (Exception e ){

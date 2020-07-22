@@ -2,6 +2,7 @@ package no.ntnu.config;
 
 import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.enums.RunType;
+import no.ntnu.util.FileUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -22,6 +23,8 @@ public class JavaApiConfig extends ApiConfig {
         super(configFile);
         buildConfig();
     }
+
+
 
     private void buildConfig(){
         this.readConfig();
@@ -67,5 +70,27 @@ public class JavaApiConfig extends ApiConfig {
     @Override
     protected ConfigParam[] getRunTypeConfigRows() {
         return new ConfigParam[0];
+    }
+
+    @Override
+    protected ConfigError validateRunTypeConfig() {
+        if (!doesPomExist()){
+            return ConfigError.noPomError;
+        } else if (!isClasspathValid()){
+            return ConfigError.noValidClasspathSetError;
+        } else {
+            return ConfigError.ok;
+        }
+    }
+
+    private boolean doesPomExist(){
+        File mabyePomFile = new File(FileUtils.executionDir, "pom.xml");
+
+        return mabyePomFile.exists();
+    }
+
+    // todo: implement, if time.
+    private boolean isClasspathValid(){
+        return true;
     }
 }

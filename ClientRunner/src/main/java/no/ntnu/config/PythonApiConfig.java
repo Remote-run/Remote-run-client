@@ -5,6 +5,7 @@ import no.ntnu.config.configBuilder.ConfigIntParam;
 import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.config.configBuilder.ConfigStringParam;
 import no.ntnu.enums.RunType;
+import no.ntnu.util.FileUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -36,6 +37,8 @@ public class PythonApiConfig extends ApiConfig {
         super(configFile);
         readConfig();
     }
+
+
 
     /**
      * Returns the file to execute.
@@ -150,4 +153,19 @@ public class PythonApiConfig extends ApiConfig {
         };
         return rows;
     }
+
+    @Override
+    protected ConfigError validateRunTypeConfig() {
+        if (!this.doesExecutableExist()){
+            return ConfigError.executableDoesNotExistError;
+        } else {
+            return ConfigError.ok;
+        }
+    }
+
+    private boolean doesExecutableExist(){
+        return fileToExecute.exists();
+    }
+
+
 }

@@ -5,46 +5,16 @@ import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.config.configBuilder.ConfigStringParam;
 import no.ntnu.enums.RunType;
 
-import no.ntnu.ui.cli.Column;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/*
-brainstorming hva trenger jeg
 
-- = server
-+ = client
-
-## alle
-- return mail
-- Språk/runtype
-- priority
-+ hva som skal pakkes med
-
-## java
-
-
-## python
-- path til executable
-- requierments.txt
-
-
-## andre språk
--ta seiner
-
-
- */
 
 /**
  * The abstract base class for all the other config files, contains the common configs
@@ -52,6 +22,7 @@ brainstorming hva trenger jeg
  *
  */
 public abstract class ApiConfig {
+
 
     public static final String commonConfigName = ".config";
     public static File configFile = new File(commonConfigName);
@@ -92,6 +63,8 @@ public abstract class ApiConfig {
         }
 
     }
+
+
 
 
     /**
@@ -168,6 +141,76 @@ public abstract class ApiConfig {
         return ret;
     }
 
+    /**
+     * Returns a array containg all the config params for this config. This is usually used in a table
+     * @return a array containg all the config params for this config.
+     */
+    public ConfigParam[] getConfigRows(){
+        ConfigParam[] rows = new ConfigParam[]{
+                new ConfigIntParam("Priority", this::getPriority,this::setPriority),
+                new ConfigStringParam("Runtype", () -> this.getRunType().name(), s -> {}),
+                new ConfigStringParam("Return mail", this::getReturnMail, this::setReturnMail)
+        };
+
+        return Stream.of(rows, getRunTypeConfigRows()).flatMap(Stream::of).toArray(ConfigParam[]::new);
+    }
+
+    /**
+     * Returns the config error state for the current config parameters.
+     * if everything is ok the error state ConfigError.ok is returned
+     * @return The config error state for the current config parameters.
+     */
+    public ConfigError validateConfig(){
+        ConfigError state = validateRunTypeConfig();
+        switch (state){
+            case ok:
+                return validateCommonConfig();
+            default:
+                return state;
+        }
+    }
+
+    /**
+     * Validates the common config variables, that is mail atm.
+     * @return the config error state of the common ApiConfig variables
+     */
+    private ConfigError validateCommonConfig(){
+        ConfigError state;
+        if (isMailValid()){
+            state = ConfigError.ok;
+        } else {
+            state = ConfigError.mailDomainError;
+        }
+
+        return state;
+    }
+
+    /**
+     * Cheks if the current mail is is in the valid domain if one is set, else chek for a @
+     * @return true if the current set mail is valid.
+     */
+    private boolean isMailValid(){
+        String validDomain = System.getenv("POSGRESS_PASSWORD");
+        boolean valid = false;
+
+        if (validDomain == null){
+            if (this.returnMail.endsWith(validDomain)){
+                valid = true;
+            }
+        } else {
+            // no whitelist so check for something@something.something
+            if (this.returnMail.contains("@")){
+                valid = true;
+            }
+        }
+        return valid;
+    }
+
+    /**
+     * Validates the config variables for the run type config
+     * @return the config error state for the run type config variable.
+     */
+    protected abstract ConfigError validateRunTypeConfig();
 
     /**
      * Reads the comm part of the config from the provided json object in to the ApiConfig.
@@ -208,22 +251,6 @@ public abstract class ApiConfig {
      * Shows the user the current config
      */
     protected abstract ConfigParam[] getRunTypeConfigRows();
-
-
-    public ConfigParam[] getConfigRows(){
-        ConfigParam[] rows = new ConfigParam[]{
-                new ConfigIntParam("Priority", this::getPriority,this::setPriority),
-                new ConfigStringParam("Runtype", () -> this.getRunType().name(), s -> {}),
-                new ConfigStringParam("Return mail", this::getReturnMail, this::setReturnMail)
-        };
-
-
-        return Stream.of(rows, getRunTypeConfigRows()).flatMap(Stream::of).toArray(ConfigParam[]::new);
-    }
-
-    protected void userConfigBuild(){
-
-    }
 
 
 

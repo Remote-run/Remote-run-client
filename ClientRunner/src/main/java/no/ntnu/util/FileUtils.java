@@ -2,6 +2,7 @@ package no.ntnu.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -29,5 +30,21 @@ public class FileUtils {
             e.printStackTrace();
         }
         return isChild;
+    }
+
+    /**
+     * Deletes a directory recursivly, symbolic links are not followed
+     * @param file The dir to delete.
+     */
+    public static void deleteDir(File file) {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                if (! Files.isSymbolicLink(f.toPath())) {
+                    deleteDir(f);
+                }
+            }
+        }
+        file.delete();
     }
 }

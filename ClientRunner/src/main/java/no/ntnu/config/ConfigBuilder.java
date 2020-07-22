@@ -106,8 +106,27 @@ public class ConfigBuilder {
                     }
                 }
                 activeConfig.writeConfig();
+            } else if (!activeConfig.validateConfig().equals(ConfigError.ok)){
+                ConfigError configError = activeConfig.validateConfig();
+                System.out.println("-- Error detected in config --");
+                switch (configError){
+                    case mailDomainError:
+                        // The white list check is server side. here only the is a mail adress check is done.
+                        System.out.println("Invalid mail adress provided");
+                        break;
+                    case noPomError:
+                        System.out.println("No pom.xml found in context dir");
+                        break;
+                    case noValidClasspathSetError:
+                        break;
+                    case executableDoesNotExistError:
+                        System.out.println("No Executable file found in context dir");
+                        break;
+                }
+                configOK = userInput.getYesNoInput("Unless fixed the ticket will most probably not be accepted by the server, try anyway  ", false);
             }
         }
+
         return activeConfig;
     }
 
@@ -120,10 +139,14 @@ public class ConfigBuilder {
 
         int newIndex = userInput.getIntInput("select new run type: ", 1,3);
 
-        ApiConfig newRunType = switch (newIndex){
-            case 1 -> new JavaApiConfig();
-            case 2 -> new PythonApiConfig();
-            default -> null;
+        ApiConfig newRunType = null;
+        switch (newIndex){
+            case 1:
+                newRunType = new JavaApiConfig();
+                break;
+            case 2:
+                newRunType = new PythonApiConfig();
+                break;
         };
 
         return newRunType;
