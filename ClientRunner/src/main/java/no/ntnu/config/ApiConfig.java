@@ -190,10 +190,10 @@ public abstract class ApiConfig {
      * @return true if the current set mail is valid.
      */
     private boolean isMailValid(){
-        String validDomain = System.getenv("POSGRESS_PASSWORD");
+        String validDomain = System.getenv("");//TODO: FILL DOMAIN FROM CONFIG
         boolean valid = false;
 
-        if (validDomain == null){
+        if (validDomain != null){
             if (this.returnMail.endsWith(validDomain)){
                 valid = true;
             }

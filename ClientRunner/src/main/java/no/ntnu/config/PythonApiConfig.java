@@ -164,7 +164,7 @@ public class PythonApiConfig extends ApiConfig {
     }
 
     private boolean doesExecutableExist(){
-        return fileToExecute.exists();
+        return new File(FileUtils.executionDir, fileToExecute.getPath()).exists();
     }
 
 
