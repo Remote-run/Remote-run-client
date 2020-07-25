@@ -33,6 +33,6 @@ public class ConfigFileParam implements ConfigParam {
 
     @Override
     public void setFromStringValue(String newValue) {
-        this.setFromFileValue.accept(new File(newValue));
+        this.setFromFileValue.accept(new File(newValue.replaceFirst(FileUtils.executionDir.getAbsolutePath(), "")));
     }
 }

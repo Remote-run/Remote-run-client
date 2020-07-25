@@ -96,7 +96,7 @@ public class ConfigBuilder {
                                         String.format("file %s is not in current dir %s and wil not be included, continue anyway", inputtFile.getAbsolutePath(), FileUtils.executionDir.getAbsolutePath()), false);
                             } else {
                                 validFileInput = true;
-                                configParam.setFromStringValue(inputtFile.getAbsolutePath().replaceFirst(FileUtils.executionDir.getAbsolutePath(), ""));
+                                configParam.setFromStringValue(inputtFile.getAbsolutePath());
                             }
                         }
 
