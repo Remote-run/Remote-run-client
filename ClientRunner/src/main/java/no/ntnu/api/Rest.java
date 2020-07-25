@@ -16,10 +16,18 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 
-
+/**
+ * Utility class for making rest api calls
+ */
 public class Rest {
 
-    public static void testSendFile(File sendFile, String url) throws IOException {
+    /**
+     * Makes a Rest post call to the provided url containing a multipart post with the provided file
+     * @param sendFile The file to send
+     * @param url the url to make the post call to
+     * @throws IOException If the provided file does not exist
+     */
+    public static void postFile(File sendFile, String url) throws IOException {
         try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
             final HttpPost httppost = new HttpPost(url);
 
@@ -43,7 +51,7 @@ public class Rest {
                     System.out.println("Response content length: " + resEntity.getContentLength());
                     BufferedReader reader = new BufferedReader(new InputStreamReader(resEntity.getContent()));
 
-                    reader.lines().forEach(line -> System.out.println(line));
+                    reader.lines().forEach(System.out::println);
                     reader.close();
                 }
                 EntityUtils.consume(resEntity);

@@ -2,7 +2,7 @@ package no.ntnu.config;
 
 /**
  * Enum containing all the different kind of errors (hopefully) the config can have.
- * Wold maby be better with exepions for every kind of error, but that wold have made the logic more messy
+ * Wold maybe be better with exemptions for every kind of error, but that wold have made the logic more messy
  */
 public enum ConfigError {
     // common

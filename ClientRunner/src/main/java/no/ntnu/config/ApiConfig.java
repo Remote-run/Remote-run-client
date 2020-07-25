@@ -5,46 +5,30 @@ import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.config.configBuilder.ConfigStringParam;
 import no.ntnu.enums.RunType;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 import org.json.JSONTokener;
 
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.stream.Stream;
-
 
 
 /**
  * The abstract base class for all the other config files, contains the common configs
  * for the different run types, and getters/setters for these
- *
+ * <p>
+ * Also provides methods for getting the config parameters as columns to put in a SimpleTable
  */
 public abstract class ApiConfig {
 
-
+    /**
+     * The expected name for the config file
+     */
     public static final String commonConfigName = ".config";
     public static File configFile = new File(commonConfigName);
-
-
-
-    /**
-     * the indexes used for saving the config.
-     * this is purely to avoid having to hunt and peck i decide to change these later
-     */
-    private enum configParams {
-        returnMail,
-        runType,
-        priority,
-    }
-
     protected String returnMail = "mail";
     protected RunType runType;
     protected int priority = 0;
-
     /**
      * Create a api config with all values default;
      */
@@ -54,10 +38,11 @@ public abstract class ApiConfig {
 
     /**
      * Creates a api config from a config file
+     *
      * @param configFile the file to build the config from
      */
     public ApiConfig(File configFile) {
-        if (configFile.isFile()){
+        if (configFile.isFile()) {
             ApiConfig.configFile = configFile;
         } else {
             System.out.println("Error reading config file using defaults");
@@ -66,53 +51,9 @@ public abstract class ApiConfig {
 
     }
 
-
-
-
-    /**
-     * Returns the return mail for the user.
-     * @return The return mail for the user.
-     */
-    public String getReturnMail() {
-        return returnMail;
-    }
-
-    /**
-     * Sets the return mail.
-     * @param returnMail the users return mail.
-     */
-    public void setReturnMail(String returnMail) {
-        this.returnMail = returnMail;
-        writeConfig();
-    }
-
-    /**
-     * Returns the run type.
-     * @return The run type.
-     */
-    public RunType getRunType() {
-        return runType;
-    }
-
-    /**
-     * Returns the run priority
-     * @return the run priority
-     */
-    public int getPriority() {
-        return priority;
-    }
-
-    /**
-     * sets the run priority
-     * @param priority the run priority
-     */
-    public void setPriority(int priority){
-        this.priority = priority;
-        writeConfig();
-    }
-
     /**
      * Read the run type directly from a config file without building the object
+     *
      * @param configFile the file to read from
      * @return the RunType for the config
      * @throws IOException If an io error occurs reading the config file
@@ -127,6 +68,7 @@ public abstract class ApiConfig {
 
     /**
      * Read the return mail directly from a config file without building the object
+     *
      * @param configFile the file to read from
      * @return the return mail for the config
      * @throws IOException If an io error occurs reading the config file
@@ -140,13 +82,62 @@ public abstract class ApiConfig {
     }
 
     /**
+     * Returns the return mail for the user.
+     *
+     * @return The return mail for the user.
+     */
+    public String getReturnMail() {
+        return returnMail;
+    }
+
+    /**
+     * Sets the return mail.
+     *
+     * @param returnMail the users return mail.
+     */
+    public void setReturnMail(String returnMail) {
+        this.returnMail = returnMail;
+        writeConfig();
+    }
+
+    /**
+     * Returns the run type.
+     *
+     * @return The run type.
+     */
+    public RunType getRunType() {
+        return runType;
+    }
+
+    /**
+     * Returns the run priority
+     *
+     * @return the run priority
+     */
+    public int getPriority() {
+        return priority;
+    }
+
+    /**
+     * sets the run priority
+     *
+     * @param priority the run priority
+     */
+    public void setPriority(int priority) {
+        this.priority = priority;
+        writeConfig();
+    }
+
+    /**
      * Returns a array containing all the config params for this config. This is usually used in a table
+     *
      * @return a array containing all the config params for this config.
      */
-    public ConfigParam[] getConfigRows(){
+    public ConfigParam[] getConfigRows() {
         ConfigParam[] rows = new ConfigParam[]{
-                new ConfigIntParam("Priority", this::getPriority,this::setPriority),
-                new ConfigStringParam("Run type", () -> this.getRunType().name(), s -> {}),
+                new ConfigIntParam("Priority", this::getPriority, this::setPriority),
+                new ConfigStringParam("Run type", () -> this.getRunType().name(), s -> {
+                }),
                 new ConfigStringParam("Return mail", this::getReturnMail, this::setReturnMail)
         };
 
@@ -156,9 +147,10 @@ public abstract class ApiConfig {
     /**
      * Returns the config error state for the current config parameters.
      * if everything is ok the error state ConfigError.ok is returned
+     *
      * @return The config error state for the current config parameters.
      */
-    public ConfigError validateConfig(){
+    public ConfigError validateConfig() {
         ConfigError state = validateRunTypeConfig();
         if (state == ConfigError.ok) {
             return validateCommonConfig();
@@ -168,11 +160,12 @@ public abstract class ApiConfig {
 
     /**
      * Validates the common config variables, that is mail atm.
+     *
      * @return the config error state of the common ApiConfig variables
      */
-    private ConfigError validateCommonConfig(){
+    private ConfigError validateCommonConfig() {
         ConfigError state;
-        if (isMailValid()){
+        if (isMailValid()) {
             state = ConfigError.ok;
         } else {
             state = ConfigError.mailDomainError;
@@ -183,19 +176,20 @@ public abstract class ApiConfig {
 
     /**
      * Cheks if the current mail is is in the valid domain if one is set, else check for a @
+     *
      * @return true if the current set mail is valid.
      */
-    private boolean isMailValid(){
+    private boolean isMailValid() {
         String validDomain = System.getenv("");//TODO: FILL DOMAIN FROM CONFIG
         boolean valid = false;
 
-        if (validDomain != null){
-            if (this.returnMail.endsWith(validDomain)){
+        if (validDomain != null) {
+            if (this.returnMail.endsWith(validDomain)) {
                 valid = true;
             }
         } else {
             // no whitelist so check for something@something.something
-            if (this.returnMail.contains("@")){
+            if (this.returnMail.contains("@")) {
                 valid = true;
             }
         }
@@ -204,15 +198,17 @@ public abstract class ApiConfig {
 
     /**
      * Validates the config variables for the run type config
+     *
      * @return the config error state for the run type config variable.
      */
     protected abstract ConfigError validateRunTypeConfig();
 
     /**
      * Reads the comm part of the config from the provided json object in to the ApiConfig.
+     *
      * @param jsonObject the json object to read from.
      */
-    protected void readCommonJsonObj(JSONObject jsonObject)  {
+    protected void readCommonJsonObj(JSONObject jsonObject) {
         this.returnMail = jsonObject.getString(configParams.returnMail.name());
         this.runType = RunType.valueOf(jsonObject.getString(configParams.runType.name()));
         this.priority = jsonObject.getInt(configParams.priority.name());
@@ -220,10 +216,10 @@ public abstract class ApiConfig {
 
     /**
      * writes the common parts of the config to a json object
+     *
      * @return the JSON objet with the config values
-     * @throws IOException if any of the files in the packing list does not exist
      */
-    protected JSONObject writeCommonJsonObj() throws IOException {
+    protected JSONObject writeCommonJsonObj() {
         JSONObject retObj = new JSONObject();
 
         retObj.put(configParams.returnMail.name(), this.returnMail);
@@ -248,6 +244,15 @@ public abstract class ApiConfig {
      */
     protected abstract ConfigParam[] getRunTypeConfigRows();
 
+    /**
+     * the indexes used for saving the config.
+     * this is purely to avoid having to hunt and peck i decide to change these later
+     */
+    private enum configParams {
+        returnMail,
+        runType,
+        priority,
+    }
 
 
 }
