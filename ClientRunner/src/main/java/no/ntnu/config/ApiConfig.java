@@ -4,14 +4,16 @@ import no.ntnu.config.configBuilder.ConfigIntParam;
 import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.config.configBuilder.ConfigStringParam;
 import no.ntnu.enums.RunType;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+import org.json.JSONTokener;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.stream.Stream;
 
 
@@ -31,7 +33,7 @@ public abstract class ApiConfig {
 
     /**
      * the indexes used for saving the config.
-     * this is purly to avoid having to hunt and peck i decide to change theese later
+     * this is purely to avoid having to hunt and peck i decide to change these later
      */
     private enum configParams {
         returnMail,
@@ -52,14 +54,14 @@ public abstract class ApiConfig {
 
     /**
      * Creates a api config from a config file
-     * @param configFile the file to buld the config from
+     * @param configFile the file to build the config from
      */
     public ApiConfig(File configFile) {
         if (configFile.isFile()){
-            this.configFile = configFile;
+            ApiConfig.configFile = configFile;
         } else {
-            // TODO: this super shold not fail silently and use defalts
-            this.configFile = new File(configFile, commonConfigName);
+            System.out.println("Error reading config file using defaults");
+            ApiConfig.configFile = new File(configFile, commonConfigName);
         }
 
     }
@@ -110,45 +112,41 @@ public abstract class ApiConfig {
     }
 
     /**
-     * Read the run type directly from a config file without bulding the object
+     * Read the run type directly from a config file without building the object
      * @param configFile the file to read from
      * @return the RunType for the config
-     * @throws ParseException error parsing the JSON file
-     * @throws IOException
+     * @throws IOException If an io error occurs reading the config file
      */
-    public static RunType getRunType(File configFile) throws ParseException, IOException {
+    public static RunType getRunType(File configFile) throws IOException {
         FileReader reader = new FileReader(configFile);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-        RunType ret = RunType.valueOf((String) jsonObject.get(configParams.runType.name()));
+        JSONObject jsonObject = new JSONObject(new JSONTokener(reader));
+        RunType ret = RunType.valueOf(jsonObject.getString(configParams.runType.name()));
         reader.close();
         return ret;
     }
 
     /**
-     * Read the return mail directly from a config file without bulding the object
+     * Read the return mail directly from a config file without building the object
      * @param configFile the file to read from
      * @return the return mail for the config
-     * @throws ParseException error parsing the JSON file
-     * @throws IOException
+     * @throws IOException If an io error occurs reading the config file
      */
-    public static String getReturnMail(File configFile) throws ParseException, IOException {
+    public static String getReturnMail(File configFile) throws IOException {
         FileReader reader = new FileReader(configFile);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-        String ret = (String) jsonObject.get(configParams.returnMail.name());
+        JSONObject jsonObject = new JSONObject(new JSONTokener(reader));
+        String ret = jsonObject.getString(configParams.returnMail.name());
         reader.close();
         return ret;
     }
 
     /**
-     * Returns a array containg all the config params for this config. This is usually used in a table
-     * @return a array containg all the config params for this config.
+     * Returns a array containing all the config params for this config. This is usually used in a table
+     * @return a array containing all the config params for this config.
      */
     public ConfigParam[] getConfigRows(){
         ConfigParam[] rows = new ConfigParam[]{
                 new ConfigIntParam("Priority", this::getPriority,this::setPriority),
-                new ConfigStringParam("Runtype", () -> this.getRunType().name(), s -> {}),
+                new ConfigStringParam("Run type", () -> this.getRunType().name(), s -> {}),
                 new ConfigStringParam("Return mail", this::getReturnMail, this::setReturnMail)
         };
 
@@ -162,12 +160,10 @@ public abstract class ApiConfig {
      */
     public ConfigError validateConfig(){
         ConfigError state = validateRunTypeConfig();
-        switch (state){
-            case ok:
-                return validateCommonConfig();
-            default:
-                return state;
+        if (state == ConfigError.ok) {
+            return validateCommonConfig();
         }
+        return state;
     }
 
     /**
@@ -186,7 +182,7 @@ public abstract class ApiConfig {
     }
 
     /**
-     * Cheks if the current mail is is in the valid domain if one is set, else chek for a @
+     * Cheks if the current mail is is in the valid domain if one is set, else check for a @
      * @return true if the current set mail is valid.
      */
     private boolean isMailValid(){
@@ -217,9 +213,9 @@ public abstract class ApiConfig {
      * @param jsonObject the json object to read from.
      */
     protected void readCommonJsonObj(JSONObject jsonObject)  {
-        this.returnMail = (String) jsonObject.get(configParams.returnMail.name());
-        this.runType = RunType.valueOf((String) jsonObject.get(configParams.runType.name()));
-        this.priority = ((Long) jsonObject.get(configParams.priority.name())).intValue();
+        this.returnMail = jsonObject.getString(configParams.returnMail.name());
+        this.runType = RunType.valueOf(jsonObject.getString(configParams.runType.name()));
+        this.priority = jsonObject.getInt(configParams.priority.name());
     }
 
     /**

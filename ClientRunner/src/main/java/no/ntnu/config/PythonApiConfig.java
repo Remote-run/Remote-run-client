@@ -6,8 +6,8 @@ import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.config.configBuilder.ConfigStringParam;
 import no.ntnu.enums.RunType;
 import no.ntnu.util.FileUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.File;
 import java.io.FileReader;
@@ -96,16 +96,15 @@ public class PythonApiConfig extends ApiConfig {
     protected void readConfig(){
         if (configFile.exists()){
             try {
-                JSONParser jsonParser = new JSONParser();
                 FileReader reader = new FileReader(configFile);
-                JSONObject loadObject = (JSONObject) jsonParser.parse(reader);
+                JSONObject loadObject = new JSONObject(new JSONTokener(reader));
 
                 // let the super handle it's arguments
                 super.readCommonJsonObj(loadObject);
 
-                this.fileToExecute = new File((String) loadObject.get(pythonConfigParams.fileToExecute.name()));
-                this.executionArgs = (String) loadObject.get(pythonConfigParams.executionArgs.name());
-                this.image = (String) loadObject.get(pythonConfigParams.image.name());
+                this.fileToExecute = new File(loadObject.getString(pythonConfigParams.fileToExecute.name()));
+                this.executionArgs = loadObject.getString(pythonConfigParams.executionArgs.name());
+                this.image = loadObject.getString(pythonConfigParams.image.name());
 
                 reader.close();
             } catch (Exception e){
@@ -131,11 +130,12 @@ public class PythonApiConfig extends ApiConfig {
             FileWriter writer = new FileWriter(configFile);
             JSONObject saveObject = super.writeCommonJsonObj();
 
+
             saveObject.put(pythonConfigParams.fileToExecute.name(), this.fileToExecute.getCanonicalPath());
             saveObject.put(pythonConfigParams.executionArgs.name(), this.executionArgs);
             saveObject.put(pythonConfigParams.image.name(), this.image);
 
-            writer.write(saveObject.toString());
+            saveObject.write(writer);
             writer.close();
 
         } catch (IOException e){

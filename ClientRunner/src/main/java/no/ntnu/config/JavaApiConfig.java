@@ -3,8 +3,9 @@ package no.ntnu.config;
 import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.enums.RunType;
 import no.ntnu.util.FileUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 
 import java.io.File;
 import java.io.FileReader;
@@ -34,9 +35,8 @@ public class JavaApiConfig extends ApiConfig {
     protected void readConfig(){
         if (configFile.exists()){
             try {
-                JSONParser jsonParser = new JSONParser();
                 FileReader reader = new FileReader(configFile);
-                JSONObject loadObject = (JSONObject) jsonParser.parse(reader);
+                JSONObject loadObject = new JSONObject(new JSONTokener(reader));
                 super.readCommonJsonObj(loadObject);
                 reader.close();
             } catch (Exception e){
@@ -58,7 +58,7 @@ public class JavaApiConfig extends ApiConfig {
         try {
             FileWriter writer = new FileWriter(configFile);
             JSONObject saveObject = super.writeCommonJsonObj();
-            writer.write(saveObject.toString());
+            saveObject.write(writer);
             writer.close();
 
         } catch (IOException e){
