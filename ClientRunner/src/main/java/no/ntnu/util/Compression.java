@@ -1,20 +1,8 @@
 package no.ntnu.util;
 
 import java.io.*;
-import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.util.zip.*;
-
-/*
-TODO:   lots of stuff to do here.
-            1. doble check every exeption that gets thrown her what can be handled and are there any plase that wold benefit from a comment in the exeption
-            2. zipping files shold have an option to owerwrite or abc(2).zip the files
-                2.5. maby add functionallyty to unzip a abc(2).zip -> abc not abc(2)
-            3. document everything
-
-
-
-
- */
 
 
 /**
@@ -22,150 +10,241 @@ TODO:   lots of stuff to do here.
  */
 public class Compression {
 
-    private static final File systemTmpDir = new File(System.getProperty("java.io.tmpdir"));
-    private static final DebugLogger dbl = new DebugLogger(true);
 
-    private static File getFirstFreeName(File wishedName, String endTag) throws IOException {
-
-        File freeName;
-        if (wishedName.exists()) {
-            int increment = 0;
-
-            String maybePath = wishedName.getCanonicalPath() + "(%u)" + endTag;
-            while (new File(String.format(maybePath, increment)).exists()) {
-                increment++;
-            }
-            freeName = new File(String.format(maybePath, increment));
-        } else {
-            freeName = wishedName;
+    /**
+     * Zips the contents of a dir at the provided path to the provided out file at the provided compression level.
+     *
+     * @param dirPath          The path to the dir to compress
+     * @param outPath          the path to the compressed out file
+     * @param compressionLevel the level of compression
+     * @throws FileNotFoundException If the input file does not exists, or is a file
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    public static void zipContents(File dirPath, File outPath, int compressionLevel) throws IOException {
+        if (dirPath.isDirectory()) {
+            throw new FileNotFoundException("Zip contents target not a dir");
         }
 
-        return freeName;
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(outPath));
+        zipOutputStream.setLevel(compressionLevel);
+        zipDirectory(dirPath, outPath.getName(), zipOutputStream, true);
+        zipOutputStream.close();
+    }
+
+    /**
+     * GunZips the dir at the provided path to a .zip.gz file. zip with no compression is used for packaging because tar is not natively supported
+     *
+     * @param dirPath The path to the dir to compress
+     * @throws FileNotFoundException If the input file does not exists or is an directory.
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    public static void gZipContents(File dirPath, File outPath) throws IOException {
+        if (dirPath.isDirectory()) {
+            throw new FileNotFoundException("Zip contents target not a dir");
+        }
+
+
+        File tmpZipFile = new File(FileUtils.systemTmpDir, dirPath.getName());
+        Compression.zipContents(dirPath, tmpZipFile, Deflater.NO_COMPRESSION);
+        Compression.gZip(tmpZipFile, outPath);
+        tmpZipFile.delete();
     }
 
 
     /**
-     * Zips the file/dir at the given file path to a file
+     * Zips the file/dir at the provided path to the provided out file at the provided compression level.
      *
-     * @param filePath
-     * @throws IOException
+     * @param filePath The path to the file or dir to compress
+     * @return the compressed file
+     * @throws FileNotFoundException If the input file does not exists
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
      */
-    public static File zip(File filePath) throws IOException {
-        String maybePath = filePath.getCanonicalPath() + "%s.zip";
-        String increment = "";
-        while (new File(String.format(maybePath, increment)).exists()) {
-            increment = (increment.equals("")) ? "1" : String.valueOf(Integer.parseInt(increment) + 1);
-        }
-        File outFile = new File(String.format(maybePath, increment));
-        Compression.zip(filePath, outFile);
-        return outFile;
+    public static File zip(File filePath) throws FileNotFoundException, ZipException, IOException {
+        return zip(filePath, null, -1);
     }
 
-    public static void zip(File filePath, File outPath) throws IOException {
-        if (outPath.exists()) throw new FileAlreadyExistsException("Zip file alredy exists");
-        if (!filePath.exists()) throw new IOException("Zip target not found");
+    /**
+     * Zips the file/dir at the provided path to the provided out file at the provided compression level.
+     *
+     * @param filePath         The path to the file or dir to compress
+     * @param outPath          the path to the compressed out file
+     * @param compressionLevel the level of compression
+     * @return the compressed file
+     * @throws FileNotFoundException If the input file does not exists
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    public static File zip(File filePath, File outPath, int compressionLevel) throws FileNotFoundException, ZipException, IOException {
+        outPath = (outPath == null) ? new File(filePath.getCanonicalPath() + ".zip") : outPath;
 
 
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(outPath));
-        zipOutputStream.setLevel(Deflater.NO_COMPRESSION); // using the zip as a tar
+        zipOutputStream.setLevel(compressionLevel);
         if (filePath.isDirectory()) {
-
-            Compression.zipDirectory(filePath, filePath.getName(), zipOutputStream);
+            Compression.zipDirectory(filePath, filePath.getName(), zipOutputStream, false);
 
         } else if (filePath.isFile()) {
             Compression.zipFile(filePath, filePath.getName(), zipOutputStream);
         }
+
         zipOutputStream.close();
+        return outPath;
     }
 
-    public static void zip(File filePath, ZipOutputStream zipOutputStream, String zippedDirCurrentPath) throws IOException {
-        if (!filePath.exists()) throw new IOException("Zip target not found");
 
-        if (filePath.isDirectory()) {
-            Compression.zipDirectory(filePath, zippedDirCurrentPath, zipOutputStream);
+    /**
+     * GunZips the file/dir at the provided path to a .zip.gz file. zip with no compression is used for packaging because tar is not natively supported
+     *
+     * @param filePath the path to the dir/file to compress
+     * @return the path to the zipped file
+     * @throws FileNotFoundException If the input file does not exists or is an directory.
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    public static File gZip(File filePath) throws FileNotFoundException, ZipException, IOException {
+        return gZip(filePath, null);
+    }
 
-        } else if (filePath.isFile()) {
-            Compression.zipFile(filePath, zippedDirCurrentPath, zipOutputStream);
+    /**
+     * GunZips the file/dir at the provided path to a .zip.gz file. zip with no compression is used for packaging because tar is not natively supported
+     *
+     * @param filePath the path to the dir/file to compress
+     * @param outPath  the path of the out file. if null one will be generated
+     * @return the path to the zipped file
+     * @throws FileNotFoundException If the input file does not exists or is an directory.
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    public static File gZip(File filePath, File outPath) throws FileNotFoundException, ZipException, IOException {
+        if (!filePath.exists()) {
+            throw new FileNotFoundException("Zip target not found");
         }
-    }
+        boolean isFile = filePath.isFile();
 
-
-    public static void gZip(File filePath) throws IOException {
-        Compression.gZip(filePath, null);
-    }
-
-    public static void gZip(File filePath, File outPath) throws IOException {
-        outPath = (outPath == null) ? new File(filePath.getCanonicalPath() + ".gzip") : outPath;
-        //if (outPath.exists()) throw new FileAlreadyExistsException("Zip file alredy exists");
-        if (!filePath.exists()) throw new IOException("Zip target not found");
-
-
-        File compressTarget = filePath;
-        if (filePath.isDirectory()) {
-            File tmpZipFile = new File(Compression.systemTmpDir, filePath.getName());
-            ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(tmpZipFile));
-            zipOutputStream.setLevel(Deflater.NO_COMPRESSION); // using the zip as a tar
-            Compression.zipDirectory(filePath, tmpZipFile.getName(), zipOutputStream);
-            zipOutputStream.close();
-            compressTarget = tmpZipFile;
+        if (outPath == null) {
+            outPath = (isFile) ? new File(filePath.getCanonicalPath() + ".gz") : new File(filePath.getCanonicalPath() + ".zip.gz");
         }
 
-        Compression.gzipFileCompress(compressTarget, outPath);
+
+        File tmpZipFile = new File(FileUtils.systemTmpDir, filePath.getName());
+        Compression.zip(filePath, tmpZipFile, Deflater.NO_COMPRESSION); // using the zip as a tar
+
+        Compression.gzipFileCompress(tmpZipFile, outPath);
+        tmpZipFile.delete();
+
+        return outPath;
     }
 
-    public static void unzip(File filePath) throws IOException {
-        Compression.unzip(filePath, null);
+
+    /**
+     * Unzips the provided .zip, .gz or .zip.gz file to the selected directory. if the out dir does not exist one wil be created
+     *
+     * @param filePath the path to the file to decompress
+     * @throws FileNotFoundException If the input file does not exists. if the output dir is a file
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    public static void unzip(File filePath) throws FileNotFoundException, ZipException, IOException {
+        unzip(filePath, null);
     }
 
-    public static void unzip(File filePath, File outDir) throws IOException {
+    /**
+     * Unzips the provided .zip, .gz or .zip.gz file to the selected directory. if the out dir does not exist one wil be created
+     *
+     * @param filePath the path to the file to decompress
+     * @param outDir   the dir to decompress inn to
+     * @throws FileNotFoundException If the input file does not exists. if the output dir is a file
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    public static void unzip(File filePath, File outDir) throws FileNotFoundException, ZipException, IOException {
+        boolean isGzip = filePath.getCanonicalPath().endsWith(".gz");
+        boolean isZip = FileUtils.getFileWithOneLessEnding(filePath).getCanonicalPath().endsWith(".zip");
+        if (!(isGzip || isZip)) {
+            throw new IOException("Unsupported decompression file ending");
+        }
+
         if (outDir == null) {
-            dbl.log("no out dir given");
-            outDir = Compression.getPathWithoutEnding(filePath);
-            outDir.mkdir();
+            outDir = (isGzip && isZip) ?
+                    FileUtils.getFileWithOneLessEnding(FileUtils.getFileWithOneLessEnding(filePath)) :
+                    FileUtils.getFileWithOneLessEnding(filePath);
+            var suc = outDir.mkdir();
+            if (!suc) {
+                throw new IOException("cannot write unzipped root dir");
+            }
         }
 
 
-        if (filePath.getName().endsWith(".gzip") || filePath.getName().endsWith(".gz")) {
-            dbl.log("gunzip detected starting unzip");
+        if (isGzip && !isZip) {
+            //plan .gz decompress
+            File tmpFile = new File(FileUtils.systemTmpDir, FileUtils.getFileWithOneLessEnding(filePath).getName());
+            gzipFileDecompress(filePath, tmpFile);
+            Files.move(tmpFile.toPath(), new File(outDir, tmpFile.getName()).toPath());
+        } else if (isGzip) {
+            // zip.gz decompress
+            File tmpFile = new File(FileUtils.systemTmpDir, FileUtils.getFileWithOneLessEnding(filePath).getName());
+            gzipFileDecompress(filePath, tmpFile);
 
-            File tmpZipFile = new File(Compression.systemTmpDir.getCanonicalPath() + File.separator + filePath.getName().substring(0, ".gzip".length() + 1));
-            //tmpZipFile.delete();
-            //File tmpZipFile = new File(Compression.systemTmpDir().getCanonicalPath() + File.separator  + filePath.getName());
-            gzipFileDecompress(filePath, tmpZipFile);
-            _unzip(tmpZipFile, outDir);
-            tmpZipFile.delete();
-            dbl.log("unzip complete");
+            unzipZipFile(filePath, outDir);
+            tmpFile.delete();
         } else {
-            dbl.log("normal zip decompress");
-            _unzip(filePath, outDir);
+            // plain .zip decompress
+            unzipZipFile(filePath, outDir);
         }
     }
 
     // -- private
-    private static File getPathWithoutEnding(File file) throws IOException {
-        return new File(file.getCanonicalPath().substring(0, file.getCanonicalPath().lastIndexOf(".")));
 
-    }
 
-    private static void zipDirectory(File dirPath, String zippedDirPath, ZipOutputStream stream) throws IOException {
+    /**
+     * Recursively goes through the provided dir and zips all the files and sub directories to the provided ZipOutputStream
+     *
+     * @param dirPath       system path to the dir to zip
+     * @param zippedDirPath the zip path to the dir to zip
+     * @param stream        the ZipOutputStream to write to
+     * @param onlyContents  true if the parent dir should be included false if only the contents
+     * @throws ZipException If there is an error zipping the zip file
+     * @throws IOException  if an io error has occurred
+     */
+    private static void zipDirectory(File dirPath, String zippedDirPath, ZipOutputStream stream, boolean onlyContents) throws ZipException, IOException {
         zippedDirPath = zippedDirPath.endsWith(File.separator) ? zippedDirPath : zippedDirPath + File.separator;
 
-        stream.putNextEntry(new ZipEntry(zippedDirPath));
-        stream.closeEntry();
+        if (onlyContents) {
+            stream.putNextEntry(new ZipEntry(zippedDirPath));
+            stream.closeEntry();
+        }
 
 
-        for (File childFile : dirPath.listFiles()) {
-            File childFp = new File(dirPath.getCanonicalPath() + File.separator + childFile.getName());
-            if (childFile.isDirectory()) {
-                Compression.zipDirectory(childFp, zippedDirPath + childFile.getName() + File.separator, stream);
-            } else {
-                Compression.zipFile(childFp, zippedDirPath + childFile.getName(), stream);
+        File[] dirContents = dirPath.listFiles();
+
+        if (dirContents != null) {
+            for (File childFile : dirContents) {
+                File childFp = new File(dirPath.getCanonicalPath() + File.separator + childFile.getName());
+                if (childFile.isDirectory()) {
+                    Compression.zipDirectory(childFp, zippedDirPath + childFile.getName() + File.separator, stream, false);
+                } else {
+                    Compression.zipFile(childFp, zippedDirPath + childFile.getName(), stream);
+                }
             }
         }
+
     }
 
 
-    private static void zipFile(File filePath, String zippedPath, ZipOutputStream stream) throws IOException {
+    /**
+     * Creates an entry on the provided ZipOutputStream and writes the file from the provide file path to the provided zip path
+     *
+     * @param filePath   the path to the file on the system
+     * @param zippedPath the path to the file in the zip file
+     * @param stream     the ZipOutputStream to write the file to
+     * @throws FileNotFoundException If the input file does not exists or is an directory.
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    private static void zipFile(File filePath, String zippedPath, ZipOutputStream stream) throws FileNotFoundException, ZipException, IOException {
         FileInputStream inputStream = new FileInputStream(filePath);
         stream.putNextEntry(new ZipEntry(zippedPath));
 
@@ -178,11 +257,19 @@ public class Compression {
         stream.closeEntry();
     }
 
-    private static void _unzip(File filePath, File outDir) throws IOException {
-        if (!filePath.exists()) throw new IOException("unzip target not found");
-
-        dbl.log("Outfile");
-        dbl.fileLog(outDir);
+    /**
+     * Unzips the provided zip file to the provided dir
+     *
+     * @param filePath the file object of the file to unzip
+     * @param outDir   the directory to unzip into
+     * @throws FileNotFoundException If the input file does not exists or is an directory. If the output file is not a directory
+     * @throws ZipException          If there is an error unzipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    private static void unzipZipFile(File filePath, File outDir) throws FileNotFoundException, ZipException, IOException {
+        if (outDir.isDirectory()) {
+            throw new FileNotFoundException("Unzip out dir is not a dir");
+        }
 
         byte[] buffer = new byte[1024];
 
@@ -193,7 +280,10 @@ public class Compression {
             File entryFile = new File(outDir, zipEntry.getName());
             testForZipSlip(entryFile, outDir);
             if (zipEntry.isDirectory()) {
-                entryFile.mkdir();
+                var suc = entryFile.mkdir();
+                if (!suc) {
+                    throw new IOException("cannot write unzipped dir");
+                }
             } else {
                 FileOutputStream outputStream = new FileOutputStream(entryFile);
 
@@ -210,13 +300,30 @@ public class Compression {
         zipInputStream.close();
     }
 
+    /**
+     * Tests if the unzipped entry is located outside the decompress dir.
+     * If this is the case someone is utilizing the Zip slip vulnerability, raise an IOException
+     *
+     * @param entryPath  the path of the unzipped entry
+     * @param outDirPath the path of the out dir
+     * @throws IOException if the entry is outside the out dir
+     */
     private static void testForZipSlip(File entryPath, File outDirPath) throws IOException {
-        if (!entryPath.getCanonicalPath().startsWith(outDirPath.getCanonicalPath() + File.separator)) {
+        if (!FileUtils.isFileChildOfDir(entryPath, outDirPath)) {
             throw new IOException("Entry is outside of the target dir: " + entryPath.getCanonicalPath());
         }
     }
 
-    private static void gzipFileCompress(File toCompress, File outFile) throws IOException {
+    /**
+     * Gzip compresses the provided file to the provided out file
+     * If the outFile already exists it wil be overwritten TODO: test this
+     *
+     * @param toCompress the file to compress
+     * @param outFile    the output file for the compression
+     * @throws FileNotFoundException If the input file does not exists or is an directory. If the output file is a directory
+     * @throws IOException           if an io error has occurred
+     */
+    private static void gzipFileCompress(File toCompress, File outFile) throws FileNotFoundException, IOException {
         FileInputStream inputStream = new FileInputStream(toCompress);
         FileOutputStream outputStream = new FileOutputStream(outFile);
         GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
@@ -232,7 +339,17 @@ public class Compression {
         outputStream.close();
     }
 
-    private static void gzipFileDecompress(File compressed, File outFile) throws IOException {
+    /**
+     * Decompresses the provided gzip file to the provided out file
+     * If the outFile already exists it wil be overwritten TODO: test this
+     *
+     * @param compressed the file to decompress
+     * @param outFile    the file to decompress to
+     * @throws FileNotFoundException If the input file does not exists or is an directory. If the output file is a directory
+     * @throws ZipException          If there is an error unzipping the gzip file
+     * @throws IOException           if an io error has occurred
+     */
+    private static void gzipFileDecompress(File compressed, File outFile) throws FileNotFoundException, ZipException, IOException {
         FileInputStream inputStream = new FileInputStream(compressed);
         FileOutputStream outputStream = new FileOutputStream(outFile);
         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
