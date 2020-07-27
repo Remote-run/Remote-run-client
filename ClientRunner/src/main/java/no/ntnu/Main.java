@@ -11,6 +11,14 @@ import java.io.File;
 import java.nio.file.Paths;
 
 public class Main {
+    /*
+    TODO:
+        - url må bli en param
+        - Skriv en readme som inkludere info om hvordan og legg til nye kjøremåter
+
+
+
+     */
 
     public static void main(String[] args) {
         File configFile = new File(ApiConfig.commonConfigName);
