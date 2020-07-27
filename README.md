@@ -1,7 +1,9 @@
-# Remote-run-client
+# Remote-run/Remote-run-client
+The client-side executable used for the remote run system. This is the executable source i.e. probably not what you are looking for, go to one of the template dirs for instructions on how to use the differn trun  modes.
 
 
-## wil write docs later
-#### i havent made the UI yet but the funtionallity is there for testing. tu try it simply change the path in
-https://github.com/Remote-run/Remote-run-client/blob/master/ClientRunner/src/main/java/no/ntnu/clienttestingstuff.java
-#### to a local path pointing to one of the example project or any other prjects with a pom and a config file(i wil pbl make a template repo later). after that when run the dir shold be packed and sent to the remote-run server (atm hardcoded localhost)
+## Requirements
+The executable itself has no dependencys for running
+
+
+

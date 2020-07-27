@@ -71,13 +71,27 @@ public class Compression {
      *
      * @param filePath         The path to the file or dir to compress
      * @param outPath          the path to the compressed out file
+     * @return the compressed file
+     * @throws FileNotFoundException If the input file does not exists
+     * @throws ZipException          If there is an error zipping the zip file
+     * @throws IOException           if an io error has occurred
+     */
+    public static File zip(File filePath, File outPath) throws FileNotFoundException, ZipException, IOException {
+        return zip(filePath, outPath, Deflater.DEFAULT_COMPRESSION);
+    }
+
+    /**
+     * Zips the file/dir at the provided path to the provided out file at the provided compression level.
+     *
+     * @param filePath         The path to the file or dir to compress
+     * @param outPath          the path to the compressed out file
      * @param compressionLevel the level of compression
      * @return the compressed file
      * @throws FileNotFoundException If the input file does not exists
      * @throws ZipException          If there is an error zipping the zip file
      * @throws IOException           if an io error has occurred
      */
-    public static File zip(File filePath, File outPath, int compressionLevel) throws FileNotFoundException, ZipException, IOException {
+    private static File zip(File filePath, File outPath, int compressionLevel) throws FileNotFoundException, ZipException, IOException {
         outPath = (outPath == null) ? new File(filePath.getCanonicalPath() + ".zip") : outPath;
 
 
