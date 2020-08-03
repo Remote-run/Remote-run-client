@@ -124,7 +124,7 @@ public class ConfigBuilder {
                                 userInput.getStingInputt(String.format("input value for %s param: ", changerName)));
                     }
                 }
-                activeConfig.writeConfig();
+                activeConfig.writeConfigToFile();// todo: this is acidental that works try to remove
             } else if (!activeConfig.validateConfig().equals(ConfigError.ok)) {
                 ConfigError configError = activeConfig.validateConfig();
                 System.out.println("-- Error detected in config --");
@@ -171,6 +171,12 @@ public class ConfigBuilder {
             case 2:
                 newRunType = new PythonApiConfig();
                 break;
+        }
+
+        boolean useDefaultKey = userInput.getYesNoInput("Use default resource key? ", true);
+
+        if (!useDefaultKey){
+            newRunType.setResourceKey(userInput.getStingInputt("input resource key: ").trim());
         }
 
         return newRunType;

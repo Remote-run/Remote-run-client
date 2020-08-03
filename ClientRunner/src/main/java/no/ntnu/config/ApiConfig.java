@@ -7,9 +7,7 @@ import no.ntnu.enums.RunType;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.stream.Stream;
 
 
@@ -29,6 +27,8 @@ public abstract class ApiConfig {
     protected String returnMail = "mail";
     protected RunType runType;
     protected int priority = 0;
+    private String resourceKey = "DEFAULT";
+
     /**
      * Create a api config with all values default;
      */
@@ -52,6 +52,37 @@ public abstract class ApiConfig {
     }
 
     /**
+     * Returns the configs resource key
+     * @return the configs resource key
+     */
+    public String getResourceKey() {
+        return resourceKey;
+    }
+
+    /**
+     * Read the resource key directly from a config file without building the object
+     *
+     * @param configFile the file to read from
+     * @return the resource key for the config
+     * @throws IOException If an io error occurs reading the config file
+     */
+    public static String getResourceKey(File configFile) throws IOException {
+        FileReader reader = new FileReader(configFile);
+        JSONObject jsonObject = new JSONObject(new JSONTokener(reader));
+        String ret = jsonObject.getString(configParams.resourceKey.name());
+        reader.close();
+        return ret;
+    }
+
+    /**
+     * Sets the configs resource key
+     * @param resourceKey the new resource key to set
+     */
+    public void setResourceKey(String resourceKey) {
+        this.resourceKey = resourceKey;
+    }
+
+    /**
      * Read the run type directly from a config file without building the object
      *
      * @param configFile the file to read from
@@ -65,6 +96,8 @@ public abstract class ApiConfig {
         reader.close();
         return ret;
     }
+
+
 
     /**
      * Read the return mail directly from a config file without building the object
@@ -97,7 +130,7 @@ public abstract class ApiConfig {
      */
     public void setReturnMail(String returnMail) {
         this.returnMail = returnMail;
-        writeConfig();
+        readConfigFromFile();
     }
 
     /**
@@ -125,7 +158,7 @@ public abstract class ApiConfig {
      */
     public void setPriority(int priority) {
         this.priority = priority;
-        writeConfig();
+        readConfigFromFile();
     }
 
     /**
@@ -203,41 +236,69 @@ public abstract class ApiConfig {
      */
     protected abstract ConfigError validateRunTypeConfig();
 
-    /**
-     * Reads the comm part of the config from the provided json object in to the ApiConfig.
-     *
-     * @param jsonObject the json object to read from.
-     */
-    protected void readCommonJsonObj(JSONObject jsonObject) {
-        this.returnMail = jsonObject.getString(configParams.returnMail.name());
-        this.runType = RunType.valueOf(jsonObject.getString(configParams.runType.name()));
-        this.priority = jsonObject.getInt(configParams.priority.name());
+
+    protected void readConfigFromFile() {
+        if (configFile.exists()) {
+            try {
+                FileReader reader = new FileReader(configFile);
+                JSONObject loadObject = new JSONObject(new JSONTokener(reader));
+
+                this.returnMail = loadObject.getString(configParams.returnMail.name());
+                this.runType = RunType.valueOf(loadObject.getString(configParams.runType.name()));
+                this.priority = loadObject.getInt(configParams.priority.name());
+                this.resourceKey = loadObject.getString(configParams.resourceKey.name());
+
+                this.readRunTypeConfig(loadObject);
+                reader.close();
+            } catch (Exception e) {
+                System.out.println("ERROR READING CONFIG: " + e.getMessage());
+                System.out.println("Using defaults");
+                writeConfigToFile();
+            }
+        } else {
+            writeConfigToFile();
+        }
+
     }
 
-    /**
-     * writes the common parts of the config to a json object
-     *
-     * @return the JSON objet with the config values
-     */
-    protected JSONObject writeCommonJsonObj() {
-        JSONObject retObj = new JSONObject();
 
-        retObj.put(configParams.returnMail.name(), this.returnMail);
-        retObj.put(configParams.runType.name(), this.runType.name());
-        retObj.put(configParams.priority.name(), this.priority);
+    protected void writeConfigToFile() {
+        try {
+            FileWriter writer = new FileWriter(configFile);
 
-        return retObj;
+            JSONObject saveObject = new JSONObject();
+
+            saveObject.put(configParams.returnMail.name(), this.returnMail);
+            saveObject.put(configParams.runType.name(), this.runType.name());
+            saveObject.put(configParams.priority.name(), this.priority);
+            saveObject.put(configParams.resourceKey.name(), this.resourceKey);
+
+            this.writeRunTypeConfig(saveObject);
+
+            saveObject.write(writer);
+            writer.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    /**
-     * Read the config from the default config file
-     */
-    protected abstract void readConfig();
 
     /**
-     * Write the config to the config file
+     * Reads the run type config params from the provided jsonObject
+     *
+     * @param jsonObject the object to read the params from
      */
-    protected abstract void writeConfig();
+    protected abstract void readRunTypeConfig(JSONObject jsonObject);
+
+
+    /**
+     * Writes the run type config params to the provided jsonObject
+     *
+     * @param jsonObject the object to write the params to
+     */
+    protected abstract void writeRunTypeConfig(JSONObject jsonObject);
 
     /**
      * Shows the user the current config
@@ -252,6 +313,7 @@ public abstract class ApiConfig {
         returnMail,
         runType,
         priority,
+        resourceKey,
     }
 
 

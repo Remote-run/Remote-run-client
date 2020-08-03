@@ -10,8 +10,6 @@ import org.json.JSONTokener;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 
 
 /**
@@ -31,7 +29,7 @@ public class PythonApiConfig extends ApiConfig {
      */
     public PythonApiConfig() {
         super(RunType.PYTHON);
-        readConfig();
+        super.readConfigFromFile();
     }
 
     /**
@@ -42,7 +40,7 @@ public class PythonApiConfig extends ApiConfig {
      */
     public PythonApiConfig(File configFile) {
         super(configFile);
-        readConfig();
+        super.readConfigFromFile();
     }
 
     /**
@@ -99,60 +97,24 @@ public class PythonApiConfig extends ApiConfig {
         this.image = image;
     }
 
-    /**
-     * Tries to read the config from a file in the current context with the common config name.
-     * If no such file exist or there are some errors reading the default config is used
-     */
+
     @Override
-    protected void readConfig() {
-        if (configFile.exists()) {
-            try {
-                FileReader reader = new FileReader(configFile);
-                JSONObject loadObject = new JSONObject(new JSONTokener(reader));
-
-                // let the super handle it's arguments
-                super.readCommonJsonObj(loadObject);
-
-                this.fileToExecute = new File(loadObject.getString(pythonConfigParams.fileToExecute.name()));
-                this.executionArgs = loadObject.getString(pythonConfigParams.executionArgs.name());
-                this.image = loadObject.getString(pythonConfigParams.image.name());
-
-                reader.close();
-            } catch (Exception e) {
-                System.out.println("ERROR READING CONFIG: " + e.getMessage());
-                System.out.println("Using defaults");
-                super.runType = RunType.PYTHON;
-                writeConfig();
-            }
-        } else {
-            super.runType = RunType.PYTHON;
-            writeConfig();
-        }
-
+    protected void readRunTypeConfig(JSONObject jsonObject) {
+        this.fileToExecute = new File(jsonObject.getString(pythonConfigParams.fileToExecute.name()));
+        this.executionArgs = jsonObject.getString(pythonConfigParams.executionArgs.name());
+        this.image = jsonObject.getString(pythonConfigParams.image.name());
 
     }
 
-    /**
-     * Writes the current config to a file with the common config name in the current context
-     */
+
     @Override
-    protected void writeConfig() {
+    protected void writeRunTypeConfig(JSONObject jsonObject) {
         try {
-            FileWriter writer = new FileWriter(configFile);
-            JSONObject saveObject = super.writeCommonJsonObj();
+            jsonObject.put(pythonConfigParams.fileToExecute.name(), this.fileToExecute.getCanonicalPath());
+        } catch (Exception e){}
 
-
-            saveObject.put(pythonConfigParams.fileToExecute.name(), this.fileToExecute.getCanonicalPath());
-            saveObject.put(pythonConfigParams.executionArgs.name(), this.executionArgs);
-            saveObject.put(pythonConfigParams.image.name(), this.image);
-
-            saveObject.write(writer);
-            writer.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        jsonObject.put(pythonConfigParams.executionArgs.name(), this.executionArgs);
+        jsonObject.put(pythonConfigParams.image.name(), this.image);
     }
 
     /**

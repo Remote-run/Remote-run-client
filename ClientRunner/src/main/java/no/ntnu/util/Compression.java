@@ -10,6 +10,8 @@ import java.util.zip.*;
  */
 public class Compression {
 
+    private static final DebugLogger dbl = new DebugLogger(false);
+
 
     /**
      * Zips the contents of a dir at the provided path to the provided out file at the provided compression level.
@@ -193,16 +195,18 @@ public class Compression {
 
 
         if (isGzip && !isZip) {
+            dbl.log("only gz");
             //plan .gz decompress
             File tmpFile = new File(FileUtils.systemTmpDir, FileUtils.getFileWithOneLessEnding(filePath).getName());
             gzipFileDecompress(filePath, tmpFile);
             Files.move(tmpFile.toPath(), new File(outDir, tmpFile.getName()).toPath());
         } else if (isGzip) {
+            dbl.log("only zip.gz");
             // zip.gz decompress
             File tmpFile = new File(FileUtils.systemTmpDir, FileUtils.getFileWithOneLessEnding(filePath).getName());
             gzipFileDecompress(filePath, tmpFile);
 
-            unzipZipFile(filePath, outDir);
+            unzipZipFile(tmpFile, outDir);
             tmpFile.delete();
         } else {
             // plain .zip decompress
@@ -226,7 +230,7 @@ public class Compression {
     private static void zipDirectory(File dirPath, String zippedDirPath, ZipOutputStream stream, boolean onlyContents) throws ZipException, IOException {
         zippedDirPath = zippedDirPath.endsWith(File.separator) ? zippedDirPath : zippedDirPath + File.separator;
 
-        if (onlyContents) {
+        if (!onlyContents) {
             stream.putNextEntry(new ZipEntry(zippedDirPath));
             stream.closeEntry();
         }
@@ -281,7 +285,7 @@ public class Compression {
      * @throws IOException           if an io error has occurred
      */
     private static void unzipZipFile(File filePath, File outDir) throws FileNotFoundException, ZipException, IOException {
-        if (outDir.isDirectory()) {
+        if (!outDir.isDirectory()) {
             throw new FileNotFoundException("Unzip out dir is not a dir");
         }
 
@@ -290,7 +294,9 @@ public class Compression {
         ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath));
         ZipEntry zipEntry = zipInputStream.getNextEntry();
 
+
         while (zipEntry != null) {
+            dbl.log(zipEntry);
             File entryFile = new File(outDir, zipEntry.getName());
             testForZipSlip(entryFile, outDir);
             if (zipEntry.isDirectory()) {
@@ -324,7 +330,7 @@ public class Compression {
      */
     private static void testForZipSlip(File entryPath, File outDirPath) throws IOException {
         if (!FileUtils.isFileChildOfDir(entryPath, outDirPath)) {
-            throw new IOException("Entry is outside of the target dir: " + entryPath.getCanonicalPath());
+            throw new IOException("Entry:" +entryPath.getCanonicalPath() + " is outside of the target dir: " + outDirPath.getCanonicalPath());
         }
     }
 

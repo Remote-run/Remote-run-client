@@ -20,12 +20,9 @@ public class FileUtils {
     public static boolean isFileChildOfDir(File file, File parent) {
         boolean isChild = false;
         try {
-            if (file.exists() && parent.exists()) {
-                if (file.getCanonicalPath().startsWith(parent.getCanonicalPath() + File.separator)) {
-                    isChild = true;
-                }
+            if (file.getCanonicalPath().startsWith(parent.getCanonicalPath() + File.separator)) {
+                isChild = true;
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }

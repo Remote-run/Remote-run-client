@@ -21,7 +21,7 @@ public class JavaApiConfig extends ApiConfig {
      */
     public JavaApiConfig() {
         super(RunType.JAVA);
-        readConfig();
+        super.readConfigFromFile();
     }
 
     /**
@@ -32,50 +32,16 @@ public class JavaApiConfig extends ApiConfig {
      */
     public JavaApiConfig(File configFile) {
         super(configFile);
-        readConfig();
+        super.readConfigFromFile();
     }
 
 
-    /**
-     * Tries to read the config from a file in the current context with the common config name.
-     * If no such file exist or there are some errors reading the default config is used
-     */
     @Override
-    protected void readConfig() {
-        if (configFile.exists()) {
-            try {
-                FileReader reader = new FileReader(configFile);
-                JSONObject loadObject = new JSONObject(new JSONTokener(reader));
-                super.readCommonJsonObj(loadObject);
-                reader.close();
-            } catch (Exception e) {
-                System.out.println("ERROR READING CONFIG: " + e.getMessage());
-                System.out.println("Using defaults");
-                super.runType = RunType.JAVA;
-                writeConfig();
-            }
-        } else {
-            super.runType = RunType.JAVA;
-            writeConfig();
-        }
-    }
+    protected void readRunTypeConfig(JSONObject jsonObject) { }
 
-    /**
-     * Writes the current config to a file with the common config name in the current context
-     */
+
     @Override
-    protected void writeConfig() {
-        try {
-            FileWriter writer = new FileWriter(configFile);
-            JSONObject saveObject = super.writeCommonJsonObj();
-            saveObject.write(writer);
-            writer.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
+    protected void writeRunTypeConfig(JSONObject jsonObject) {}
 
     /**
      * returns the run type config rows for this config type.
