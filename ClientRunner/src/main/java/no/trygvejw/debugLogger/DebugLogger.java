@@ -41,21 +41,36 @@ public class DebugLogger {
      */
     public void log(Object... tolog) {
         if (this.print) {
-            StackTraceElement tracePos = this.getCallerStackPoisson();
-
             String printString = Stream.of(tolog).map(Objects::toString).collect(Collectors.joining(" "));
-            System.out.printf("%-70s", printString);
 
-            if (tracePos != null) {
-                System.out.printf("\u001B[32m\t\t%s.%s\u001B[0m(\u001B[36m%s:%d\u001B[0m)\n",
-                        tracePos.getClassName(),
-                        tracePos.getMethodName(),
-                        tracePos.getFileName(),
-                        tracePos.getLineNumber());
-            } else {
-                System.out.println();
-            }
+            System.out.printf("%-70s\t\t", printString);
+            System.out.println(this.getFormattedCallerStackPosString());
         }
+    }
+
+    /**
+     * prints arbitrary list of objects using the objects toString method
+     * this is s(imple)Log that is without the stack location of the print
+     *
+     * @param tolog the objects to log
+     */
+    public void sLog(Object... tolog){
+        if (this.print){
+            String printString = Stream.of(tolog).map(Objects::toString).collect(Collectors.joining(" "));
+            System.out.println(printString);
+        }
+    }
+
+
+    public void dumpStackHere(){
+        if (this.print){
+            System.out.printf("##### dumping stack at: %s #####\n", this.getFormattedCallerStackPosString());
+            for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
+                System.out.println(stackTraceElement);
+            }
+            System.out.println("##### dumping stack end #####");
+        }
+
     }
 
 
@@ -66,7 +81,7 @@ public class DebugLogger {
      */
     public void fileLog(File file) {
         try {
-            System.out.println("-- Debug file log --");
+            System.out.printf("-- Debug file log at %s --\n", this.getFormattedCallerStackPosString());
             System.out.printf(
                     "File name      : %s\n" +
                             "File parent    : %s\n" +
@@ -86,6 +101,23 @@ public class DebugLogger {
             System.out.println("-- log end --");
         } catch (IOException e) {
             System.out.println("debug err IO exeption");
+        }
+    }
+
+    /**
+     * returns the current stack pos color formatted
+     * @return the current stack pos color formatted
+     */
+    private String getFormattedCallerStackPosString(){
+        StackTraceElement tracePos = this.getCallerStackPoisson();
+        if (tracePos != null){
+            return String.format("\u001B[32m%s.%s\u001B[0m(\u001B[36m%s:%d\u001B[0m)",
+                    tracePos.getClassName(),
+                    tracePos.getMethodName(),
+                    tracePos.getFileName(),
+                    tracePos.getLineNumber());
+        } else {
+            return " ";
         }
     }
 

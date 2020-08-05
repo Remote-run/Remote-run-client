@@ -53,7 +53,7 @@ public class Main {
 
         try{
             Compression.gZip(parentDir, gzipFileName);
-            Rest.postFile(gzipFileName, "http://localhost:8080/com.example.RemoteRunApiServlet/");
+            Rest.postFile(gzipFileName, "https://remote-run.uials.no/com.example.RemoteRunApiServlet/");
         } catch (Exception e){
             e.printStackTrace();
         }

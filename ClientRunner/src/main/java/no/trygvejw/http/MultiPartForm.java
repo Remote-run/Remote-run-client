@@ -1,5 +1,7 @@
 package no.trygvejw.http;
 
+import no.trygvejw.debugLogger.DebugLogger;
+
 import java.io.*;
 import java.lang.reflect.Array;
 import java.net.http.HttpRequest;
@@ -10,6 +12,7 @@ import java.util.*;
 public class MultiPartForm {
 
     // ---- fields ---- //
+    private static final DebugLogger dbl = new DebugLogger(true);
     private final Vector<FormPart> formParts = new Vector<>();
 
     private final UUID boundary = UUID.randomUUID();
@@ -19,8 +22,8 @@ public class MultiPartForm {
     // ---- public ---- //
 
     public String getContentTypeHeader(){
-
-        return "Content-Type: multipart/form-data; boundary=" + boundary;
+        dbl.log("multipart/form-data; boundary=" + boundary);
+        return "multipart/form-data; boundary=" + boundary;
     }
 
     public HttpRequest.BodyPublisher getPublisher(){
@@ -92,7 +95,7 @@ public class MultiPartForm {
 
         @Override
         protected String getFormString() {
-            return "--" + boundary + "--\r\n";
+            return "--" + boundary + "--";
         }
     }
 
@@ -167,16 +170,19 @@ public class MultiPartForm {
                 if(part instanceof StreamablePart){
                     this.activeStream = ((StreamablePart) part).getInputStreamStream();
                 }
+                dbl.sLog(stringPart);
                 return stringPart.getBytes(StandardCharsets.UTF_8);
             } else {
                 byte[] buffer = new byte[4096];
                 try {
                     int bytesRead = activeStream.read(buffer);
                     if (bytesRead > 0){
+                        System.out.print(Arrays.copyOf(buffer, bytesRead));
                         return Arrays.copyOf(buffer, bytesRead);
                     } else {
                       activeStream.close();
                       activeStream = null;
+                      dbl.sLog("\n\r");
                       return "\n\r".getBytes(StandardCharsets.UTF_8);
                     }
                 } catch (IOException e){
