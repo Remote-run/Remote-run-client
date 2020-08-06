@@ -28,6 +28,7 @@ public abstract class ApiConfig {
     protected RunType runType;
     protected int priority = 0;
     private String resourceKey = "DEFAULT";
+    private String url = "_";
 
     /**
      * Create a api config with all values default;

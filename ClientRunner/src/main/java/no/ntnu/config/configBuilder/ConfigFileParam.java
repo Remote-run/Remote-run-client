@@ -1,6 +1,8 @@
 package no.ntnu.config.configBuilder;
 
-import no.ntnu.util.FileUtils;
+
+
+import no.trygvejw.util.FileUtils;
 
 import java.io.File;
 import java.util.function.Consumer;

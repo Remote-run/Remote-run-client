@@ -4,6 +4,10 @@ import no.trygvejw.debugLogger.DebugLogger;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.function.Predicate;
 import java.util.zip.*;
 
 
@@ -13,6 +17,18 @@ import java.util.zip.*;
 public class Compression {
 
     private static final DebugLogger dbl = new DebugLogger(false);
+
+    /*
+        TODO: rydd opp her, tenker denne burde reduseres til ferre fungsjoner, burde også kasnej ha et filter på hva som skal taes med
+
+
+
+
+     */
+
+
+
+
 
 
     /**
@@ -244,9 +260,9 @@ public class Compression {
             for (File childFile : dirContents) {
                 File childFp = new File(dirPath.getCanonicalPath() + File.separator + childFile.getName());
                 if (childFile.isDirectory()) {
-                    Compression.zipDirectory(childFp, zippedDirPath + childFile.getName() + File.separator, stream, false);
+                    zipDirectory(childFp, zippedDirPath + childFile.getName() + File.separator, stream, false);
                 } else {
-                    Compression.zipFile(childFp, zippedDirPath + childFile.getName(), stream);
+                    zipFile(childFp, zippedDirPath + childFile.getName(), stream);
                 }
             }
         }
@@ -298,14 +314,23 @@ public class Compression {
 
 
         while (zipEntry != null) {
+
             dbl.log(zipEntry);
+
             File entryFile = new File(outDir, zipEntry.getName());
+
             testForZipSlip(entryFile, outDir);
+
+            /*
+            File parentDir = entryFile.getParentFile();
+
+            if (!parentDir.exists()){
+                if (!parentDir.mkdirs()) throw new IOException("Parent dir does not exist and cant be written to");
+            }
+            */
+
             if (zipEntry.isDirectory()) {
-                var suc = entryFile.mkdir();
-                if (!suc) {
-                    throw new IOException("cannot write unzipped dir");
-                }
+                if (!entryFile.mkdir()) throw new IOException("cannot write unzipped dir");
             } else {
                 FileOutputStream outputStream = new FileOutputStream(entryFile);
 
@@ -386,6 +411,9 @@ public class Compression {
         gzipInputStream.close();
         outputStream.close();
     }
+
+
+
 
 
 }

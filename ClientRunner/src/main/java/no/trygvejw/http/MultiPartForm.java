@@ -177,7 +177,6 @@ public class MultiPartForm {
                 try {
                     int bytesRead = activeStream.read(buffer);
                     if (bytesRead > 0){
-                        System.out.print(Arrays.copyOf(buffer, bytesRead));
                         return Arrays.copyOf(buffer, bytesRead);
                     } else {
                       activeStream.close();

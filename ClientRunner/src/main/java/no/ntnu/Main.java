@@ -5,7 +5,7 @@ import no.ntnu.config.ApiConfig;
 import no.ntnu.config.ConfigBuilder;
 import no.ntnu.config.JavaApiConfig;
 import no.ntnu.config.PythonApiConfig;
-import no.ntnu.util.Compression;
+import no.trygvejw.util.Compression;
 
 import java.io.File;
 import java.nio.file.Paths;

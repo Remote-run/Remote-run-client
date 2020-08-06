@@ -3,10 +3,10 @@ package no.ntnu.config;
 import no.ntnu.config.configBuilder.ConfigFileParam;
 import no.ntnu.config.configBuilder.ConfigIntParam;
 import no.ntnu.config.configBuilder.ConfigParam;
-import no.ntnu.ui.cli.Column;
-import no.ntnu.ui.cli.SimpleTable;
-import no.ntnu.ui.cli.SimpleUserInput;
-import no.ntnu.util.FileUtils;
+import no.trygvejw.simpleUi.SimpleUserInput;
+import no.trygvejw.simpleUi.simpleTable.Column;
+import no.trygvejw.simpleUi.simpleTable.SimpleTable;
+import no.trygvejw.util.FileUtils;
 
 import java.io.File;
 import java.util.Arrays;
@@ -100,7 +100,7 @@ public class ConfigBuilder {
                     } else if (configParam instanceof ConfigFileParam) {
                         boolean validFileInput = false;
                         while (!validFileInput) {
-                            String userFileInput = userInput.getStingInputt("Input file name: ").trim();
+                            String userFileInput = userInput.getStringInputt("Input file name: ").trim();
                             if (userFileInput.startsWith("'") && userFileInput.endsWith("'")) {
                                 // allows for dragging files to the unix terminal
                                 userFileInput = userFileInput.substring(1, userFileInput.length() - 1);
@@ -121,7 +121,7 @@ public class ConfigBuilder {
 
                     } else {
                         configParam.setFromStringValue(
-                                userInput.getStingInputt(String.format("input value for %s param: ", changerName)));
+                                userInput.getStringInputt(String.format("input value for %s param: ", changerName)));
                     }
                 }
                 activeConfig.writeConfigToFile();// todo: this is acidental that works try to remove
@@ -176,7 +176,7 @@ public class ConfigBuilder {
         boolean useDefaultKey = userInput.getYesNoInput("Use default resource key? ", true);
 
         if (!useDefaultKey){
-            newRunType.setResourceKey(userInput.getStingInputt("input resource key: ").trim());
+            newRunType.setResourceKey(userInput.getStringInputt("input resource key: ").trim());
         }
 
         return newRunType;

@@ -7,7 +7,10 @@ import java.util.Scanner;
 
 
 /*
-TODO: - posebillety for alowing empty inputs maby return option
+TODO:
+    - singelton?
+    - is the open Scanner system in an issue? it is not coled atm
+    - default values shold be supported
 
 
 

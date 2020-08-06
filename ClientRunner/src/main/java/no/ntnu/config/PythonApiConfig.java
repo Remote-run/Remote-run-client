@@ -4,7 +4,7 @@ import no.ntnu.config.configBuilder.ConfigFileParam;
 import no.ntnu.config.configBuilder.ConfigParam;
 import no.ntnu.config.configBuilder.ConfigStringParam;
 import no.ntnu.enums.RunType;
-import no.ntnu.util.FileUtils;
+import no.trygvejw.util.FileUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
