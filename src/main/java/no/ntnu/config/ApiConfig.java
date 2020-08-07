@@ -27,6 +27,8 @@ public abstract class ApiConfig {
     protected String returnMail = "mail";
     protected RunType runType;
     protected int priority = 0;
+
+    // these tow are only set when generating a new config
     private String resourceKey = "DEFAULT";
     private String url = "_";
 
@@ -76,11 +78,29 @@ public abstract class ApiConfig {
     }
 
     /**
+     * Returns the api url
+     * @return the api url
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * Sets the api url
+     * @param url the url to set
+     */
+    public void setUrl(String url) {
+        this.url = url;
+        writeConfigToFile();
+    }
+
+    /**
      * Sets the configs resource key
      * @param resourceKey the new resource key to set
      */
     public void setResourceKey(String resourceKey) {
         this.resourceKey = resourceKey;
+        writeConfigToFile();
     }
 
     /**
@@ -131,7 +151,7 @@ public abstract class ApiConfig {
      */
     public void setReturnMail(String returnMail) {
         this.returnMail = returnMail;
-        readConfigFromFile();
+        writeConfigToFile();
     }
 
     /**
@@ -159,7 +179,7 @@ public abstract class ApiConfig {
      */
     public void setPriority(int priority) {
         this.priority = priority;
-        readConfigFromFile();
+        writeConfigToFile();
     }
 
     /**
@@ -170,9 +190,13 @@ public abstract class ApiConfig {
     public ConfigParam[] getConfigRows() {
         ConfigParam[] rows = new ConfigParam[]{
                 new ConfigIntParam("Priority", this::getPriority, this::setPriority),
+                new ConfigStringParam("Resource key", this::getResourceKey, this::setResourceKey),
+                new ConfigStringParam("Server url", this::getUrl, this::setUrl),
                 new ConfigStringParam("Run type", () -> this.getRunType().name(), s -> {
                 }),
                 new ConfigStringParam("Return mail", this::getReturnMail, this::setReturnMail)
+
+
         };
 
         return Stream.of(rows, getRunTypeConfigRows()).flatMap(Stream::of).toArray(ConfigParam[]::new);
@@ -248,6 +272,7 @@ public abstract class ApiConfig {
                 this.runType = RunType.valueOf(loadObject.getString(configParams.runType.name()));
                 this.priority = loadObject.getInt(configParams.priority.name());
                 this.resourceKey = loadObject.getString(configParams.resourceKey.name());
+                this.url = loadObject.getString(configParams.url.name());
 
                 this.readRunTypeConfig(loadObject);
                 reader.close();
@@ -273,6 +298,7 @@ public abstract class ApiConfig {
             saveObject.put(configParams.runType.name(), this.runType.name());
             saveObject.put(configParams.priority.name(), this.priority);
             saveObject.put(configParams.resourceKey.name(), this.resourceKey);
+            saveObject.put(configParams.url.name(), this.url);
 
             this.writeRunTypeConfig(saveObject);
 
@@ -315,6 +341,7 @@ public abstract class ApiConfig {
         runType,
         priority,
         resourceKey,
+        url,
     }
 
 

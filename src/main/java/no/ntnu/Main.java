@@ -22,12 +22,13 @@ public class Main {
 
     public static void main(String[] args) {
         File configFile = new File(ApiConfig.commonConfigName);
+        ApiConfig config = null;
         if (configFile.exists()){
 
 
             try{
 
-                ApiConfig config = null;
+
                 switch (ApiConfig.getRunType(configFile)){
                     case JAVA:
                         config = new JavaApiConfig(configFile);
@@ -49,11 +50,16 @@ public class Main {
 
         File tmpDir = new File(System.getProperty("java.io.tmpdir"));
         File gzipFileName = new File(tmpDir + "/remote_run.gzip");
+        //"https://remote-run.uials.no/com.example.RemoteRunApiServlet/"
 
 
         try{
-            Compression.gZip(parentDir, gzipFileName);
-            Rest.postFile(gzipFileName, "https://remote-run.uials.no/com.example.RemoteRunApiServlet/");
+            // blacklisting like this is sub optimal because the entire compression class is sub optimal this shold be adressed later
+            Compression.gZip(parentDir, gzipFileName, file ->
+                    file.getName().startsWith("Remote-run") ||
+                    file.getName().startsWith("ClientRunner") ||
+                    file.getName().endsWith(".class"));
+            Rest.postFile(gzipFileName, config.getUrl());
         } catch (Exception e){
             e.printStackTrace();
         }

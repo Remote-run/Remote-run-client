@@ -270,6 +270,9 @@ public class Compression {
     }
 
 
+
+
+
     /**
      * Creates an entry on the provided ZipOutputStream and writes the file from the provide file path to the provided zip path
      *
@@ -410,6 +413,73 @@ public class Compression {
         inputStream.close();
         gzipInputStream.close();
         outputStream.close();
+    }
+
+
+
+    //////  this is sort of temporary until the whole class is rewritten it wil happen soon^tm     //////
+
+
+    private static void zipDirectory(File dirPath, String zippedDirPath, ZipOutputStream stream, Predicate<File> doNotInclude) throws ZipException, IOException {
+        zippedDirPath = zippedDirPath.endsWith(File.separator) ? zippedDirPath : zippedDirPath + File.separator;
+
+
+        stream.putNextEntry(new ZipEntry(zippedDirPath));
+        stream.closeEntry();
+
+
+
+        File[] dirContents = dirPath.listFiles();
+
+        if (dirContents != null) {
+            for (File childFile : dirContents) {
+                File childFp = new File(dirPath.getCanonicalPath() + File.separator + childFile.getName());
+                if (childFile.isDirectory()) {
+                    zipDirectory(childFp, zippedDirPath + childFile.getName() + File.separator, stream, doNotInclude);
+                } else {
+                    if (!doNotInclude.test(childFile)){
+                        zipFile(childFp, zippedDirPath + childFile.getName(), stream);
+                    }
+                }
+            }
+        }
+
+    }
+    public static File gZip(File filePath, File outPath, Predicate<File> doNotInclude) throws FileNotFoundException, ZipException, IOException {
+        if (!filePath.exists()) {
+            throw new FileNotFoundException("Zip target not found");
+        }
+        boolean isFile = filePath.isFile();
+
+        if (outPath == null) {
+            outPath = (isFile) ? new File(filePath.getCanonicalPath() + ".gz") : new File(filePath.getCanonicalPath() + ".zip.gz");
+        }
+
+
+        File tmpZipFile = new File(FileUtils.systemTmpDir, filePath.getName());
+        Compression.zip(filePath, tmpZipFile, Deflater.NO_COMPRESSION, doNotInclude); // using the zip as a tar
+
+        Compression.gzipFileCompress(tmpZipFile, outPath);
+        tmpZipFile.delete();
+
+        return outPath;
+    }
+
+    private static File zip(File filePath, File outPath, int compressionLevel, Predicate<File> doNotInclude) throws FileNotFoundException, ZipException, IOException {
+        outPath = (outPath == null) ? new File(filePath.getCanonicalPath() + ".zip") : outPath;
+
+
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(outPath));
+        zipOutputStream.setLevel(compressionLevel);
+        if (filePath.isDirectory()) {
+            Compression.zipDirectory(filePath, filePath.getName(), zipOutputStream, doNotInclude);
+
+        } else if (filePath.isFile()) {
+            Compression.zipFile(filePath, filePath.getName(), zipOutputStream);
+        }
+
+        zipOutputStream.close();
+        return outPath;
     }
 
 

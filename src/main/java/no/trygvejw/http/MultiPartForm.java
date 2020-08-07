@@ -12,7 +12,7 @@ import java.util.*;
 public class MultiPartForm {
 
     // ---- fields ---- //
-    private static final DebugLogger dbl = new DebugLogger(true);
+    private static final DebugLogger dbl = new DebugLogger(false);
     private final Vector<FormPart> formParts = new Vector<>();
 
     private final UUID boundary = UUID.randomUUID();

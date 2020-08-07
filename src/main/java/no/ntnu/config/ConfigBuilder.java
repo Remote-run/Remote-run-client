@@ -173,11 +173,6 @@ public class ConfigBuilder {
                 break;
         }
 
-        boolean useDefaultKey = userInput.getYesNoInput("Use default resource key? ", true);
-
-        if (!useDefaultKey){
-            newRunType.setResourceKey(userInput.getStringInputt("input resource key: ").trim());
-        }
 
         return newRunType;
     }
